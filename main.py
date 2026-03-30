@@ -1,3 +1,8 @@
+"""
+URL Shortener API - Main application file
+Production-ready FastAPI application
+"""
+
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
@@ -7,9 +12,12 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
-#from app.database import SessionLocal
+from app.database import SessionLocal
 
 # ============================================================================
+# APPLICATION
+# ============================================================================
+
 app = FastAPI(title="URL Shortener API")
 
 # ============================================================================
@@ -17,7 +25,7 @@ app = FastAPI(title="URL Shortener API")
 # ============================================================================
 
 def get_db():
-    """Dependency para obter sessão do banco"""
+    """Dependency to get database session"""
     db = SessionLocal()
     try:
         yield db
@@ -25,8 +33,11 @@ def get_db():
         db.close()
 
 
-async def get_current_user(request: Request, db: Session = Depends(get_db)) -> UUID:
-    """Extrai API key do header e retorna user_id"""
+async def get_current_user(
+    request: Request, 
+    db: Session = Depends(get_db)
+) -> UUID:
+    """Extract API key from Authorization header and return user_id"""
     auth_header = request.headers.get("Authorization", "")
     
     if not auth_header.startswith("Bearer "):
@@ -44,6 +55,7 @@ async def get_current_user(request: Request, db: Session = Depends(get_db)) -> U
 # ============================================================================
 
 class URLCreateRequest(BaseModel):
+    """Request model for creating a shortened URL"""
     original_url: str
     custom_slug: Optional[str] = None
     expires_at: Optional[datetime] = None
@@ -51,6 +63,7 @@ class URLCreateRequest(BaseModel):
 
 
 class URLResponse(BaseModel):
+    """Response model for URL"""
     id: int
     short_code: str
     original_url: str
@@ -70,7 +83,7 @@ async def create_short_url(
     db: Session = Depends(get_db),
     user_id: UUID = Depends(get_current_user)
 ):
-    """Cria uma URL encurtada"""
+    """Create a new shortened URL"""
     # Validate URL
     # Generate unique short_code if not custom
     # Check rate limit via Redis
@@ -82,10 +95,10 @@ async def create_short_url(
 @app.get("/{short_code}")
 async def redirect_to_original(
     short_code: str,
-    db: Session = Depends(get_db),
-    request: Request
+    request: Request,
+    db: Session = Depends(get_db)
 ):
-    """Redireciona para URL original"""
+    """Redirect to original URL and track the click"""
     # Check Redis cache first
     # If miss: query PostgreSQL
     # Track click (async to Celery)
@@ -99,7 +112,7 @@ async def get_analytics(
     db: Session = Depends(get_db),
     user_id: UUID = Depends(get_current_user)
 ):
-    """Retorna analytics da URL"""
+    """Get analytics for a specific URL"""
     # Return aggregated metrics
     # Geographic breakdown
     # Device breakdown
