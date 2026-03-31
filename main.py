@@ -21,6 +21,19 @@ from app.database import SessionLocal
 app = FastAPI(title="URL Shortener API")
 
 # ============================================================================
+# HEALTH CHECK
+# ============================================================================
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return {
+        "status": "ok",
+        "service": "URL Shortener API",
+        "version": "1.0.0"
+    }
+
+# ============================================================================
 # DEPENDENCIES
 # ============================================================================
 
@@ -118,3 +131,19 @@ async def get_analytics(
     # Device breakdown
     # Time-series data
     pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
