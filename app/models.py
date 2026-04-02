@@ -1,4 +1,4 @@
-"""
+ """
 SQLAlchemy ORM Models for URL Shortener
 Production-grade models with validations and constraints
 """
@@ -14,13 +14,13 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
-    JSONB,
     String,
     Text,
     INET,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.dialects.postgresql import JSONB
 
 Base = declarative_base()
 
@@ -244,4 +244,4 @@ class AuditLog(Base):
     )
 
     def __repr__(self):
-        return f"<AuditLog(action={self.action}, resource={self.resource_type})>"
+        return f"<AuditLog(action={self.action}, resource={self.resource_type})>"   
