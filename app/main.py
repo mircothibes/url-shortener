@@ -6,7 +6,6 @@ Production-ready FastAPI application
 from datetime import datetime, timezone
 from typing import Optional, List
 from uuid import UUID
-import uuid
 import secrets
 
 from fastapi import FastAPI, HTTPException, Depends, Request
@@ -195,6 +194,124 @@ async def create_short_url(
     return url
 
 # ============================================================================
+# ROUTES - LIST URLs
+# ============================================================================
+
+@app.get("/api/v1/urls", response_model=List[URLResponse])
+async def list_user_urls(
+    db: Session = Depends(get_db),
+    user_id: UUID = Depends(get_current_user),
+):
+    """List all URLs created by current user"""
+
+    urls = db.query(URL).filter(
+        URL.user_id == user_id,
+        URL.is_active == True
+    ).order_by(URL.created_at.desc()).all()
+
+    return urls
+
+# ============================================================================
+# ROUTES - GET URL DETAILS
+# ============================================================================
+
+@app.get("/api/v1/urls/{url_id}", response_model=URLResponse)
+async def get_url_details(
+    url_id: int,
+    db: Session = Depends(get_db),
+    user_id: UUID = Depends(get_current_user),
+):
+    """Get details of a specific URL"""
+
+    url = db.query(URL).filter(URL.id == url_id, URL.user_id == user_id).first()
+
+    if not url:
+        raise HTTPException(status_code=404, detail="URL not found")
+
+    return url
+
+# ============================================================================
+# ROUTES - GET ANALYTICS
+# ============================================================================
+
+@app.get("/api/v1/urls/{url_id}/analytics", response_model=AnalyticsResponse)
+async def get_analytics(
+    url_id: int,
+    db: Session = Depends(get_db),
+    user_id: UUID = Depends(get_current_user),
+):
+    """Get analytics for a specific URL"""
+
+    # Verify user owns this URL
+    url = db.query(URL).filter(URL.id == url_id, URL.user_id == user_id).first()
+
+    if not url:
+        raise HTTPException(status_code=404, detail="URL not found")
+
+    # Get clicks for this URL
+    clicks = db.query(Click).filter(Click.url_id == url_id).all()
+
+    # Calculate breakdowns
+    device_breakdown = {}
+    country_breakdown = {}
+
+    for click in clicks:
+        if click.device_type:
+            device_breakdown[click.device_type] = device_breakdown.get(click.device_type, 0) + 1
+        if click.country:
+            country_breakdown[click.country] = country_breakdown.get(click.country, 0) + 1
+
+    # Get top country and device
+    top_country = max(country_breakdown, key=country_breakdown.get) if country_breakdown else None
+    top_device = max(device_breakdown, key=device_breakdown.get) if device_breakdown else None
+
+    # Count unique IPs
+    unique_ips = db.query(func.count(func.distinct(Click.ip_address))).filter(
+        Click.url_id == url_id
+    ).scalar() or 0
+
+    return {
+        "total_clicks": url.total_clicks,
+        "unique_visitors": unique_ips,
+        "top_country": top_country,
+        "top_device": top_device,
+        "device_breakdown": device_breakdown,
+        "country_breakdown": country_breakdown,
+    }
+
+# ============================================================================
+# ROUTES - DELETE URL
+# ============================================================================
+
+@app.delete("/api/v1/urls/{url_id}", status_code=204)
+async def delete_url(
+    url_id: int,
+    db: Session = Depends(get_db),
+    user_id: UUID = Depends(get_current_user),
+):
+    """Delete (deactivate) a URL"""
+
+    url = db.query(URL).filter(URL.id == url_id, URL.user_id == user_id).first()
+
+    if not url:
+        raise HTTPException(status_code=404, detail="URL not found")
+
+    # Soft delete: mark as inactive
+    url.is_active = False
+    db.commit()
+
+    # Log audit
+    audit = AuditLog(
+        user_id=user_id,
+        action="DELETE_URL",
+        resource_type="URL",
+        resource_id=str(url_id),
+        details={"short_code": url.short_code},
+    )
+    db.add(audit)
+    db.commit()
+
+# ============================================================================
 # ROUTES - REDIRECT
 # ============================================================================
 
@@ -245,124 +362,6 @@ async def redirect_to_original(
     db.commit()
 
     return RedirectResponse(url=url.original_url, status_code=307)
-
-# ============================================================================
-# ROUTES - ANALYTICS
-# ============================================================================
-
-@app.get("/api/v1/urls/{url_id}/analytics", response_model=AnalyticsResponse)
-async def get_analytics(
-    url_id: int,
-    db: Session = Depends(get_db),
-    user_id: UUID = Depends(get_current_user),
-):
-    """Get analytics for a specific URL"""
-
-    # Verify user owns this URL
-    url = db.query(URL).filter(URL.id == url_id, URL.user_id == user_id).first()
-
-    if not url:
-        raise HTTPException(status_code=404, detail="URL not found")
-
-    # Get clicks for this URL
-    clicks = db.query(Click).filter(Click.url_id == url_id).all()
-
-    # Calculate breakdowns
-    device_breakdown = {}
-    country_breakdown = {}
-
-    for click in clicks:
-        if click.device_type:
-            device_breakdown[click.device_type] = device_breakdown.get(click.device_type, 0) + 1
-        if click.country:
-            country_breakdown[click.country] = country_breakdown.get(click.country, 0) + 1
-
-    # Get top country and device
-    top_country = max(country_breakdown, key=country_breakdown.get) if country_breakdown else None
-    top_device = max(device_breakdown, key=device_breakdown.get) if device_breakdown else None
-
-    # Count unique IPs
-    unique_ips = db.query(func.count(func.distinct(Click.ip_address))).filter(
-        Click.url_id == url_id
-    ).scalar() or 0
-
-    return {
-        "total_clicks": url.total_clicks,
-        "unique_visitors": unique_ips,
-        "top_country": top_country,
-        "top_device": top_device,
-        "device_breakdown": device_breakdown,
-        "country_breakdown": country_breakdown,
-    }
-
-# ============================================================================
-# ROUTES - LIST URLs
-# ============================================================================
-
-@app.get("/api/v1/urls", response_model=List[URLResponse])
-async def list_user_urls(
-    db: Session = Depends(get_db),
-    user_id: UUID = Depends(get_current_user),
-):
-    """List all URLs created by current user"""
-
-    urls = db.query(URL).filter(
-        URL.user_id == user_id,
-        URL.is_active == True
-    ).order_by(URL.created_at.desc()).all()
-
-    return urls
-
-# ============================================================================
-# ROUTES - GET URL DETAILS
-# ============================================================================
-
-@app.get("/api/v1/urls/{url_id}", response_model=URLResponse)
-async def get_url_details(
-    url_id: int,
-    db: Session = Depends(get_db),
-    user_id: UUID = Depends(get_current_user),
-):
-    """Get details of a specific URL"""
-
-    url = db.query(URL).filter(URL.id == url_id, URL.user_id == user_id).first()
-
-    if not url:
-        raise HTTPException(status_code=404, detail="URL not found")
-
-    return url
-
-# ============================================================================
-# ROUTES - DELETE URL
-# ============================================================================
-
-@app.delete("/api/v1/urls/{url_id}", status_code=204)
-async def delete_url(
-    url_id: int,
-    db: Session = Depends(get_db),
-    user_id: UUID = Depends(get_current_user),
-):
-    """Delete (deactivate) a URL"""
-
-    url = db.query(URL).filter(URL.id == url_id, URL.user_id == user_id).first()
-
-    if not url:
-        raise HTTPException(status_code=404, detail="URL not found")
-
-    # Soft delete: mark as inactive
-    url.is_active = False
-    db.commit()
-
-    # Log audit
-    audit = AuditLog(
-        user_id=user_id,
-        action="DELETE_URL",
-        resource_type="URL",
-        resource_id=str(url_id),
-        details={"short_code": url.short_code},
-    )
-    db.add(audit)
-    db.commit()
 
 # ============================================================================
 # ERROR HANDLERS
