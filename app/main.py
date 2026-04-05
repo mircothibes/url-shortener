@@ -94,7 +94,6 @@ async def get_current_user(
 
     api_key = auth_header.replace("Bearer ", "")
 
-    # Query user from database by API key
     user = db.query(User).filter(User.api_key == api_key).first()
 
     if not user:
@@ -138,27 +137,22 @@ async def create_short_url(
 ):
     """Create a new shortened URL"""
 
-    # Validate URL format
     original_url = request.original_url
     if not original_url.startswith(("http://", "https://")):
         raise HTTPException(status_code=422, detail="Invalid URL format. Must start with http:// or https://")
 
-    # Determine short code
     if request.custom_slug:
-        # Check if custom slug already exists
         existing = db.query(URL).filter(URL.short_code == request.custom_slug).first()
         if existing:
             raise HTTPException(status_code=409, detail="Custom slug already exists")
         short_code = request.custom_slug
     else:
-        # Generate random short code (8 characters)
         while True:
             short_code = secrets.token_urlsafe(6)[:8]
             existing = db.query(URL).filter(URL.short_code == short_code).first()
             if not existing:
                 break
 
-    # Create URL record
     url = URL(
         short_code=short_code,
         original_url=original_url,
@@ -168,18 +162,15 @@ async def create_short_url(
         tags=request.tags or [],
     )
 
-    # Hash password if provided
     if request.password:
         from passlib.context import CryptContext
         pwd_context = CryptContext(schemes=["bcrypt"])
         url.password_hash = pwd_context.hash(request.password)
 
-    # Save to database
     db.add(url)
     db.commit()
     db.refresh(url)
 
-    # Log audit
     audit = AuditLog(
         user_id=user_id,
         action="CREATE_URL",
@@ -194,7 +185,7 @@ async def create_short_url(
     return url
 
 # ============================================================================
-# ROUTES - LIST URLs
+# ROUTES - LIST URLs (MUST BE BEFORE /{url_id})
 # ============================================================================
 
 @app.get("/api/v1/urls", response_model=List[URLResponse])
@@ -242,16 +233,13 @@ async def get_analytics(
 ):
     """Get analytics for a specific URL"""
 
-    # Verify user owns this URL
     url = db.query(URL).filter(URL.id == url_id, URL.user_id == user_id).first()
 
     if not url:
         raise HTTPException(status_code=404, detail="URL not found")
 
-    # Get clicks for this URL
     clicks = db.query(Click).filter(Click.url_id == url_id).all()
 
-    # Calculate breakdowns
     device_breakdown = {}
     country_breakdown = {}
 
@@ -261,11 +249,9 @@ async def get_analytics(
         if click.country:
             country_breakdown[click.country] = country_breakdown.get(click.country, 0) + 1
 
-    # Get top country and device
     top_country = max(country_breakdown, key=country_breakdown.get) if country_breakdown else None
     top_device = max(device_breakdown, key=device_breakdown.get) if device_breakdown else None
 
-    # Count unique IPs
     unique_ips = db.query(func.count(func.distinct(Click.ip_address))).filter(
         Click.url_id == url_id
     ).scalar() or 0
@@ -296,11 +282,9 @@ async def delete_url(
     if not url:
         raise HTTPException(status_code=404, detail="URL not found")
 
-    # Soft delete: mark as inactive
     url.is_active = False
     db.commit()
 
-    # Log audit
     audit = AuditLog(
         user_id=user_id,
         action="DELETE_URL",
@@ -312,7 +296,7 @@ async def delete_url(
     db.commit()
 
 # ============================================================================
-# ROUTES - REDIRECT
+# ROUTES - REDIRECT (MUST BE LAST - Catch-all route)
 # ============================================================================
 
 @app.get("/{short_code}")
@@ -323,7 +307,6 @@ async def redirect_to_original(
 ):
     """Redirect to original URL and track the click"""
 
-    # Query database
     url = db.query(URL).filter(URL.short_code == short_code).first()
 
     if not url:
@@ -332,11 +315,9 @@ async def redirect_to_original(
     if not url.is_active:
         raise HTTPException(status_code=410, detail="URL is no longer available")
 
-    # Check expiration
     if url.expires_at and url.expires_at < datetime.now(timezone.utc):
         raise HTTPException(status_code=410, detail="URL has expired")
 
-    # Check password if protected
     if url.password_hash:
         password = request.query_params.get("password")
         if not password:
@@ -347,7 +328,6 @@ async def redirect_to_original(
         if not pwd_context.verify(password, url.password_hash):
             raise HTTPException(status_code=401, detail="Invalid password")
 
-    # Track click
     click = Click(
         url_id=url.id,
         ip_address=str(request.client.host) if request.client else None,
@@ -356,7 +336,6 @@ async def redirect_to_original(
     )
     db.add(click)
 
-    # Increment denormalized counter
     url.total_clicks += 1
 
     db.commit()
@@ -382,3 +361,4 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
