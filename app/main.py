@@ -28,7 +28,7 @@ class URLResponse(BaseModel):
     short_code: str
     original_url: str
     created_at: datetime
-    clicks_total: int
+    total_clicks: int
     is_active: bool
     expires_at: Optional[datetime] = None
     description: Optional[str] = None
