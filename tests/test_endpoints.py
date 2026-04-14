@@ -137,3 +137,68 @@ class TestHealthCheck:
         data = response.json()
         assert data["status"] == "ok"
         assert "database" in data
+
+class TestDeleteURL:
+    """Tests for DELETE /api/v1/urls/{url_id} endpoint"""
+    
+    def test_delete_url_success(self, client, test_user):
+        """Test successful URL deletion"""
+        # Create a URL first
+        create_response = client.post(
+            "/api/v1/urls",
+            json={"original_url": "https://github.com"},
+            headers={"Authorization": f"Bearer {test_user.api_key}"},
+        )
+        url_id = create_response.json()["id"]
+        
+        # Delete it
+        response = client.delete(
+            f"/api/v1/urls/{url_id}",
+            headers={"Authorization": f"Bearer {test_user.api_key}"},
+        )
+        
+        assert response.status_code == 204
+    
+    def test_delete_url_not_found(self, client, test_user):
+        """Test deleting non-existent URL"""
+        response = client.delete(
+            "/api/v1/urls/99999",
+            headers={"Authorization": f"Bearer {test_user.api_key}"},
+        )
+        
+        assert response.status_code == 404
+
+
+class TestGetAnalytics:
+    """Tests for GET /api/v1/urls/{url_id}/analytics endpoint"""
+    
+    def test_get_analytics_success(self, client, test_user):
+        """Test getting analytics for a URL"""
+        # Create a URL
+        create_response = client.post(
+            "/api/v1/urls",
+            json={"original_url": "https://github.com"},
+            headers={"Authorization": f"Bearer {test_user.api_key}"},
+        )
+        url_id = create_response.json()["id"]
+        
+        # Get analytics
+        response = client.get(
+            f"/api/v1/urls/{url_id}/analytics",
+            headers={"Authorization": f"Bearer {test_user.api_key}"},
+        )
+        
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total_clicks"] == 0
+        assert "unique_visitors" in data
+    
+    def test_get_analytics_not_found(self, client, test_user):
+        """Test getting analytics for non-existent URL"""
+        response = client.get(
+            "/api/v1/urls/99999/analytics",
+            headers={"Authorization": f"Bearer {test_user.api_key}"},
+        )
+        
+        assert response.status_code == 404
+        
