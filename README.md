@@ -34,7 +34,7 @@ url-shortener/
 ├── docker-compose.yml    # Multi-service orchestration
 ├── requirements.txt      # Python dependencies
 ├── .env                  # Environment variables
-└── README.md            # This file
+└── README.md             # This file is the primary documentation
 ```
 
 ## Getting Started
