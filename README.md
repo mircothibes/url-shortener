@@ -137,9 +137,9 @@ docker compose build
 - [x] FastAPI main.py with core endpoints
 - [x] Database configuration (PostgreSQL)
 - [x] Docker & Docker Compose
-- [ ] SQLAlchemy models (WIP)
+- [x] SQLAlchemy models (WIP)
 - [x] Tests with pytest
-- [ ] API authentication
+- [x] API authentication
 - [ ] Analytics aggregation
 - [ ] GCP deployment
 
