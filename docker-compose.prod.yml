@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  fastapi:
+    image: url-shortener-api:latest
+    container_name: url-shortener-api-prod
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://app_user:dev_password@postgres:5432/url_shortener
+      REDIS_URL: redis://redis:6379
+      ENVIRONMENT: production
+    depends_on:
+      - postgres
+      - redis
+    restart: always
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: url-shortener-db-prod
+    environment:
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: url_shortener
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: url-shortener-cache-prod
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
