@@ -117,3 +117,23 @@ pytest tests/ -v
 Test coverage: 14 tests, 100% endpoint coverage
 
 ## 📊 Project Structure
+```bash
+url-shortener/
+├── app/
+│   ├── main.py           # FastAPI application
+│   ├── models.py         # SQLAlchemy models
+│   ├── database.py       # Database configuration
+│   ├── cache.py          # Redis cache setup
+│   └── tasks.py          # Background tasks
+├── tests/
+│   ├── conftest.py       # Pytest configuration
+│   └── test_endpoints.py # Endpoint tests
+├── docker-compose.yml    # Development environment
+├── docker-compose.prod.yml # Production environment
+├── Dockerfile            # Container image
+└── requirements.txt      # Python dependencies
+```
+
+
+
+
