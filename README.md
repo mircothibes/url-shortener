@@ -1,5 +1,10 @@
 # URL Shortener API
 
+![Tests](https://github.com/mircothibes/url-shortener/workflows/Tests%20&%20Code%20Quality/badge.svg)
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.135-green)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+
 A production-grade URL shortening service with advanced analytics, built with FastAPI, PostgreSQL, and Redis.
 
 ## 🚀 Features
