@@ -11,8 +11,8 @@ DATABASE_URL = os.getenv(
 
 engine = create_engine(
     DATABASE_URL,
-    poolclass=StaticPool,
-    isolation_level="AUTOCOMMIT"
+    pool_pre_ping=False,
+    echo=False
 )
 
-SessionLocal = sessionmaker(bind=engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

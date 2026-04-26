@@ -101,8 +101,10 @@ async def root():
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
-    return {"status": "ok", "service": "URL Shortener API", "version": "1.0.0"}
-
+    return JSONResponse(
+        status_code=200,
+        content={"status": "ok", "service": "URL Shortener API", "version": "1.0.0"}
+    )
 
 @app.post("/api/v1/urls", status_code=201, response_model=URLResponse, tags=["URLs"])
 async def create_short_url(
