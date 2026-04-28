@@ -84,6 +84,9 @@ def get_db():
     db = SessionLocal()
     try:        
         yield db
+    except HTTPException:
+        # Re-raise HTTP exceptions without wrapping
+        raise    
     except Exception as e:
         raise HTTPException(
             status_code=503,
@@ -453,64 +456,51 @@ async def get_analytics(
 )
 async def redirect_to_original(
     short_code: str,
-    request: Request,
-    db: Session = Depends(get_db)
+    request: Request
 ):
     """
     Redirect to the original URL for a given short code.
-    
-    This endpoint automatically:
-    - Records the click in analytics
-    - Captures IP address
-    - Logs user agent and referrer
-    - Increments click counter
-    
-    Args:
-        short_code: Short code of the URL
-        request: FastAPI request object
-        db: Database session
-        
-    Returns:
-        RedirectResponse: Redirect to original URL
-        
-    Raises:
-        HTTPException: If URL not found, expired, or password required
     """
-    url = db.query(URL).filter(URL.short_code == short_code).first()
-    
-    if not url:
-        raise HTTPException(status_code=404, detail="URL not found")
-    
-    if not url.is_active:
-        raise HTTPException(status_code=410, detail="URL is no longer available")
-    
-    # Check expiration
-    if url.expires_at and url.expires_at < datetime.now(timezone.utc):
-        raise HTTPException(status_code=410, detail="URL has expired")
-    
-    # Check password if required
-    if url.password_hash:
-        password = request.query_params.get("password")
-        if not password:
-            raise HTTPException(status_code=401, detail="Password required")
+    db = SessionLocal()
+    try:
+        url = db.query(URL).filter(URL.short_code == short_code).first()
         
-        from passlib.context import CryptContext
-        pwd_context = CryptContext(schemes=["bcrypt"])
-        if not pwd_context.verify(password, url.password_hash):
-            raise HTTPException(status_code=401, detail="Invalid password")
-    
-    # Record click
-    click = Click(
-        url_id=url.id,
-        ip_address=str(request.client.host) if request.client else None,
-        user_agent=request.headers.get("user-agent"),
-        referrer=request.headers.get("referer")
-    )
-    db.add(click)
-    url.total_clicks += 1
-    db.commit()
-    
-    return RedirectResponse(url=url.original_url, status_code=307)
+        if not url:
+            raise HTTPException(status_code=404, detail="URL not found")
+        
+        if not url.is_active:
+            raise HTTPException(status_code=410, detail="URL is no longer available")
+        
+        # Check expiration
+        if url.expires_at and url.expires_at < datetime.now(timezone.utc):
+            raise HTTPException(status_code=410, detail="URL has expired")
+        
+        # Check password if required
+        if url.password_hash:
+            password = request.query_params.get("password")
+            if not password:
+                raise HTTPException(status_code=401, detail="Password required")
+            
+            from passlib.context import CryptContext
+            pwd_context = CryptContext(schemes=["bcrypt"])
+            if not pwd_context.verify(password, url.password_hash):
+                raise HTTPException(status_code=401, detail="Invalid password")
+        
+        # Record click
+        click = Click(
+            url_id=url.id,
+            ip_address=str(request.client.host) if request.client else None,
+            user_agent=request.headers.get("user-agent"),
+            referrer=request.headers.get("referer"),
+            clicked_at=datetime.now(timezone.utc)
+        )
+        db.add(click)
+        url.total_clicks += 1
+        db.commit()
+        
+        return RedirectResponse(url=url.original_url, status_code=307)
+    finally:
+        db.close()
 
 
 # ============================================================================
