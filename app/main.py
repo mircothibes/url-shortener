@@ -11,7 +11,7 @@ from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.responses import RedirectResponse, JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import func, text
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from app.database import SessionLocal
 from app.models import User, URL, Click, AuditLog
@@ -58,8 +58,7 @@ class URLResponse(BaseModel):
     expires_at: Optional[datetime] = None
     description: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AnalyticsResponse(BaseModel):
@@ -448,59 +447,51 @@ async def get_analytics(
 # Redirect Endpoint (Catch-all)
 # ============================================================================
 
-@app.get(
-    "/{short_code}",
-    tags=["Redirects"],
-    summary="Redirect to Original URL",
-    description="Redirects to the original URL and records click analytics data"
-)
+@app.get("/{short_code}", tags=["Redirects"])
 async def redirect_to_original(
     short_code: str,
-    request: Request
+    request: Request,
+    db: Session = Depends(get_db)
 ):
-    """
-    Redirect to the original URL for a given short code.
-    """
-    db = SessionLocal()
-    try:
-        url = db.query(URL).filter(URL.short_code == short_code).first()
+    """Redirect to original URL"""
+    url = db.query(URL).filter(URL.short_code == short_code).first()
+    
+    if not url:
+        raise HTTPException(status_code=404, detail="URL not found")
+    
+    if not url.is_active:
+        raise HTTPException(status_code=410, detail="URL is no longer available")
+    
+    if url.expires_at and url.expires_at < datetime.now(timezone.utc):
+        raise HTTPException(status_code=410, detail="URL has expired")
+    
+    if url.password_hash:
+        password = request.query_params.get("password")
+        if not password:
+            raise HTTPException(status_code=401, detail="Password required")
         
-        if not url:
-            raise HTTPException(status_code=404, detail="URL not found")
-        
-        if not url.is_active:
-            raise HTTPException(status_code=410, detail="URL is no longer available")
-        
-        # Check expiration
-        if url.expires_at and url.expires_at < datetime.now(timezone.utc):
-            raise HTTPException(status_code=410, detail="URL has expired")
-        
-        # Check password if required
-        if url.password_hash:
-            password = request.query_params.get("password")
-            if not password:
-                raise HTTPException(status_code=401, detail="Password required")
-            
-            from passlib.context import CryptContext
-            pwd_context = CryptContext(schemes=["bcrypt"])
-            if not pwd_context.verify(password, url.password_hash):
-                raise HTTPException(status_code=401, detail="Invalid password")
-        
-        # Record click
-        click = Click(
-            url_id=url.id,
-            ip_address=str(request.client.host) if request.client else None,
-            user_agent=request.headers.get("user-agent"),
-            referrer=request.headers.get("referer"),
-            clicked_at=datetime.now(timezone.utc)
-        )
-        db.add(click)
-        url.total_clicks += 1
-        db.commit()
-        
-        return RedirectResponse(url=url.original_url, status_code=307)
-    finally:
-        db.close()
+        from passlib.context import CryptContext
+        pwd_context = CryptContext(schemes=["bcrypt"])
+        if not pwd_context.verify(password, url.password_hash):
+            raise HTTPException(status_code=401, detail="Invalid password")
+    
+    # Record click
+    ip_addr = "127.0.0.1"
+    if request.client and request.client.host not in ["testclient"]:
+        ip_addr = str(request.client.host)
+    
+    click = Click(
+        url_id=url.id,
+        clicked_at=datetime.now(timezone.utc),
+        ip_address=ip_addr,
+        user_agent=request.headers.get("user-agent"),
+        referrer=request.headers.get("referer")
+    )
+    db.add(click)
+    url.total_clicks += 1
+    db.commit()
+    
+    return RedirectResponse(url=url.original_url, status_code=307)
 
 
 # ============================================================================

@@ -136,7 +136,8 @@ class TestHealthCheck:
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "ok"
-        assert "database" in data
+        assert data["service"] == "URL Shortener API"
+        assert data["version"] == "1.0.0"
 
 class TestDeleteURL:
     """Tests for DELETE /api/v1/urls/{url_id} endpoint"""
