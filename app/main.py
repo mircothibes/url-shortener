@@ -237,8 +237,7 @@ async def create_short_url(
     # Hash password if provided
     if request.password:
         pwd_hasher = PasswordHasher()
-        hashed_password = pwd_hasher.hash(request.password)
-        url.password_hash = pwd_context.hash(request.password)
+        url.password_hash = pwd_hasher.hash(request.password) 
     
     db.add(url)
     db.commit()
@@ -478,8 +477,7 @@ async def redirect_to_original(
             pwd_hasher.verify(url.password_hash, password)
         except VerifyMismatchError:
             raise HTTPException(status_code=401, detail="Invalid password") 
-        if not pwd_context.verify(password, url.password_hash):
-            raise HTTPException(status_code=401, detail="Invalid password")
+       
     
     # Record click
     ip_addr = "127.0.0.1"
