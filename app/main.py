@@ -7,11 +7,16 @@ from typing import Optional, List
 from uuid import UUID
 import secrets
 
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.responses import RedirectResponse, JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import func, text
 from pydantic import BaseModel, ConfigDict
+
+from app.cors import get_cors_config, validate_cors_config
+from app.rate_limit import limiter, rate_limit_error_handler
+from slowapi.errors import RateLimitExceeded
 
 from app.database import SessionLocal
 from app.models import User, URL, Click, AuditLog
@@ -35,6 +40,26 @@ app = FastAPI(
     }
 )
 
+# ============================================================================
+# CORS Configuration
+# ============================================================================
+
+# Validate CORS configuration
+validate_cors_config()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    **get_cors_config()
+)
+
+# ============================================================================
+# Rate Limiting Configuration
+# ============================================================================
+
+# Register rate limiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_error_handler)
 
 # ============================================================================
 # Pydantic Models
