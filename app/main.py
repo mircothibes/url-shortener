@@ -5,11 +5,13 @@ Production-grade URL shortening service with advanced analytics and click tracki
 from datetime import datetime, timezone
 from typing import Optional, List
 from uuid import UUID
+
 import secrets
+import io
 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException, Depends, Request
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.responses import RedirectResponse, JSONResponse, StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import func, text
 from pydantic import BaseModel, ConfigDict
@@ -23,6 +25,7 @@ from app.models import User, URL, Click, AuditLog
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
+from app.qrcode import generate_qrcode_png
 
 
 # ============================================================================
@@ -343,6 +346,70 @@ async def get_url_details(
     
     return url
 
+@app.get(
+    "/api/v1/urls/{url_id}/qrcode",
+    tags=["URLs"],
+    summary="Get URL QR Code",
+    description="Generates and returns a QR code PNG image for the shortened URL"
+)
+async def get_qrcode(
+    url_id: int,
+    db: Session = Depends(get_db),
+    user_id: UUID = Depends(get_current_user)
+):
+    """
+    Generate and return QR code for a shortened URL.
+    
+    The QR code encodes the full shortened URL and can be scanned
+    with any QR code reader to access the link.
+    
+    Args:
+        url_id: URL record ID
+        db: Database session
+        user_id: Authenticated user ID
+        
+    Returns:
+        PNG image binary (image/png content type)
+        
+    Raises:
+        HTTPException: If URL not found or doesn't belong to user
+    """
+    # Verify URL exists and belongs to user
+    url = db.query(URL).filter(
+        URL.id == url_id,
+        URL.user_id == user_id
+    ).first()
+    
+    if not url:
+        raise HTTPException(status_code=404, detail="URL not found")
+    
+    # Build full shortened URL (use Cloud Run domain in production)
+    # For development, use localhost
+    import os
+    if os.getenv("ENVIRONMENT") == "production":
+        # In production, use your actual domain
+        base_url = os.getenv("APP_URL", "https://your-domain.com")
+    else:
+        # In development, use localhost
+        base_url = "http://localhost:8000"
+    
+    full_short_url = f"{base_url}/{url.short_code}"
+    
+    # Generate QR code
+    try:
+        qr_png = generate_qrcode_png(full_short_url)
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate QR code: {str(e)}"
+        )
+    
+    # Return PNG image with correct headers
+    return StreamingResponse(
+        io.BytesIO(qr_png),
+        media_type="image/png",
+        headers={"Content-Disposition": f"inline; filename=qrcode_{url.short_code}.png"}
+    )
 
 @app.delete(
     "/api/v1/urls/{url_id}",
