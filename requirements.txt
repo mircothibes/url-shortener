@@ -9,3 +9,4 @@ httpx==0.24.1
 cloud-sql-python-connector==1.4.3
 passlib==1.7.4
 argon2-cffi==25.1.0
+qrcode==7.4.2
