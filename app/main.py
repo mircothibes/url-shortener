@@ -27,6 +27,9 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from app.qrcode import generate_qrcode_png
 
+from app.batch import BatchURLRequest, BatchURLResponse, BatchErrorResponse, validate_batch_request
+from datetime import datetime
+
 
 # ============================================================================
 # FastAPI Application Setu
@@ -285,6 +288,154 @@ async def create_short_url(
     
     return url
 
+@app.post(
+    "/api/v1/urls/batch",
+    status_code=201,
+    response_model=BatchURLResponse,
+    tags=["URLs"],
+    summary="Create Multiple Shortened URLs",
+    description="Creates multiple shortened URLs in a single atomic transaction"
+)
+@limiter.limit("50/15 minutes")
+async def create_batch_urls(
+    request: Request,
+    batch_request: BatchURLRequest,
+    db: Session = Depends(get_db),
+    user_id: UUID = Depends(get_current_user)
+):
+    """
+    Create multiple shortened URLs in a single transaction.
+    
+    Features:
+    - Atomic: all URLs created or none
+    - Fail-fast: validates all before creating any
+    - Up to 50 URLs per batch
+    - Same customization as single URL creation
+    
+    Args:
+        request: FastAPI request object
+        batch_request: Batch request with URLs to create
+        db: Database session
+        user_id: Authenticated user ID
+        
+    Returns:
+        BatchURLResponse: List of created URLs
+        
+    Raises:
+        HTTPException: If validation fails or database error
+    """
+    # Validate entire batch before creating anything
+    validation_result = validate_batch_request(batch_request)
+    if not validation_result["valid"]:
+        raise HTTPException(
+            status_code=422,
+            detail=validation_result["error"]
+        )
+    
+    created_urls = []
+    
+    try:
+        # Get all existing short codes to avoid duplicates
+        existing_codes = db.query(URL.short_code).all()
+        existing_codes = [code[0] for code in existing_codes]
+        
+        # Generate all short codes upfront
+        short_codes_needed = []
+        for url_item in batch_request.urls:
+            if url_item.custom_slug:
+                short_codes_needed.append(url_item.custom_slug)
+            else:
+                short_codes_needed.append(None)
+        
+        # Count how many need auto-generation
+        auto_gen_count = sum(1 for code in short_codes_needed if code is None)
+        
+        # Generate auto codes
+        from app.batch import generate_short_codes
+        auto_codes = generate_short_codes(auto_gen_count, existing_codes) if auto_gen_count > 0 else []
+        
+        auto_code_index = 0
+        
+        # Create all URLs in transaction
+        for idx, url_item in enumerate(batch_request.urls):
+            # Determine short code
+            if short_codes_needed[idx]:
+                short_code = short_codes_needed[idx]
+                # Check if custom slug already exists
+                existing = db.query(URL).filter(URL.short_code == short_code).first()
+                if existing:
+                    raise HTTPException(
+                        status_code=409,
+                        detail=f"Custom slug '{short_code}' already exists"
+                    )
+            else:
+                short_code = auto_codes[auto_code_index]
+                auto_code_index += 1
+            
+            # Create URL record
+            url = URL(
+                short_code=short_code,
+                original_url=url_item.original_url,
+                user_id=user_id,
+                expires_at=url_item.expires_at,
+                description=url_item.description,
+                tags=url_item.tags or []
+            )
+            
+            # Hash password if provided
+            if url_item.password:
+                pwd_hasher = PasswordHasher()
+                url.password_hash = pwd_hasher.hash(url_item.password)
+            
+            db.add(url)
+            created_urls.append(url)
+        
+        # Commit all at once (atomic transaction)
+        db.commit()
+        
+        # Refresh all URLs to get IDs
+        for url in created_urls:
+            db.refresh(url)
+        
+        # Log audit event
+        audit = AuditLog(
+            user_id=user_id,
+            action="CREATE_BATCH_URLS",
+            resource_type="URL",
+            resource_id=str(len(created_urls)),
+            ip_address=request.client.host if hasattr(request, 'client') else None,
+            details={"count": len(created_urls), "short_codes": [u.short_code for u in created_urls]}
+        )
+        db.add(audit)
+        db.commit()
+        
+        # Build response
+        return {
+            "created": len(created_urls),
+            "urls": [
+                {
+                    "id": url.id,
+                    "short_code": url.short_code,
+                    "original_url": url.original_url,
+                    "created_at": url.created_at.isoformat(),
+                    "is_active": url.is_active,
+                    "expires_at": url.expires_at.isoformat() if url.expires_at else None,
+                    "description": url.description,
+                    "tags": url.tags
+                }
+                for url in created_urls
+            ]
+        }
+        
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create batch: {str(e)}"
+        )
 
 @app.get(
     "/api/v1/urls",
