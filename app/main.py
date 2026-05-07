@@ -40,6 +40,7 @@ from app.webhooks import (
     URLClickedEvent
 )
 from app.models import Webhook, WebhookLog
+from app.tasks import trigger_url_created_event, trigger_url_clicked_event, trigger_url_deleted_event
 
 # ============================================================================
 # FastAPI Application Setup
@@ -289,6 +290,9 @@ async def create_short_url(
     )
     db.add(audit)
     db.commit()
+
+    # Trigger webhook event
+    trigger_url_created_event(url.id)
     
     return url
 
@@ -457,6 +461,10 @@ async def delete_url(
     if not url:
         raise HTTPException(status_code=404, detail="URL not found")
     
+    # Store data before marking as inactive
+    short_code = url.short_code
+    original_url = url.original_url
+    
     url.is_active = False
     db.commit()
     
@@ -469,6 +477,9 @@ async def delete_url(
     )
     db.add(audit)
     db.commit()
+    
+    # Trigger webhook event
+    trigger_url_deleted_event(url_id, short_code, original_url, str(user_id))
 
 
 @app.post(
@@ -1012,6 +1023,14 @@ async def redirect_to_original(
     db.add(click)
     url.total_clicks += 1
     db.commit()
+
+    # Trigger webhook event
+    click_data = {
+        "ip_address": ip_addr,
+        "country": None,
+        "device_type": None  
+     }
+    trigger_url_clicked_event(url.id, click_data)
     
     return RedirectResponse(url=url.original_url, status_code=307)
 
