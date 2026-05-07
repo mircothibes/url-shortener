@@ -1,8 +1,26 @@
 # app/tasks.py
-from celery import shared_task
-from maxminddb import open_database
+from celery import Celery, shared_task
+from datetime import datetime, timezone
+import os
 
-geoip_db = open_database('GeoLite2-Country.mmdb')
+from app.database import SessionLocal
+from app.models import URL, Click, ClickAggregate, Webhook, WebhookLog, AuditLog
+
+# Create Celery app instance
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+app = Celery(
+    "url_shortener",
+    broker=REDIS_URL,
+    backend=REDIS_URL
+)
+
+app.conf.update(
+    task_serializer="json",
+    accept_content=["json"],
+    result_serializer="json",
+    timezone="UTC",
+    enable_utc=True,
+)
 
 @shared_task(bind=True, max_retries=3)
 def process_click(self, url_id: int, ip_address: str, user_agent: str, referrer: str):
@@ -110,7 +128,6 @@ def cleanup_expired_urls():
 from app.webhooks import deliver_webhook, calculate_next_retry
 from app.models import Webhook, WebhookLog
 
-
 @shared_task(bind=True, max_retries=5)
 def deliver_webhook_event(self, webhook_id: int, event_type: str, event_payload: dict, attempt_number: int = 1):
     """
@@ -122,6 +139,8 @@ def deliver_webhook_event(self, webhook_id: int, event_type: str, event_payload:
         event_payload: Event data as dict
         attempt_number: Current attempt number (1-5)
     """
+    import asyncio
+    
     db_session = SessionLocal()
     try:
         # Get webhook
@@ -137,14 +156,14 @@ def deliver_webhook_event(self, webhook_id: int, event_type: str, event_payload:
         if event_type not in webhook.events:
             return
         
-        # Attempt delivery
-        success, status_code, response_body = deliver_webhook(
+        # Attempt delivery (using asyncio.run for async function)
+        success, status_code, response_body = asyncio.run(deliver_webhook(
             webhook_url=webhook.url,
             event_type=event_type,
             event_payload=event_payload,
             secret=webhook.secret,
             timeout=10
-        )
+        ))
         
         # Log attempt
         log = WebhookLog(
@@ -183,6 +202,7 @@ def deliver_webhook_event(self, webhook_id: int, event_type: str, event_payload:
         raise
     finally:
         db_session.close()
+
 
 
 @shared_task
