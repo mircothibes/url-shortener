@@ -41,6 +41,8 @@ from app.webhooks import (
 )
 from app.models import Webhook, WebhookLog
 from app.tasks import trigger_url_created_event, trigger_url_clicked_event, trigger_url_deleted_event
+from app.domains import DomainCreateRequest, DomainResponse, validate_domain_dns, is_valid_domain_format
+from app.models import CustomDomain
 
 # ============================================================================
 # FastAPI Application Setup
@@ -974,6 +976,315 @@ async def get_webhook_logs(
         }
         for log in logs
     ]
+
+# ============================================================================
+# Custom Domain Endpoints
+# ============================================================================
+
+@app.post(
+    "/api/v1/domains",
+    status_code=201,
+    response_model=DomainResponse,
+    tags=["Domains"],
+    summary="Register Custom Domain",
+    description="Register a custom domain for URL shortening"
+)
+@limiter.limit("100/15 minutes")
+async def register_domain(
+    request: Request,
+    domain_request: DomainCreateRequest,
+    db: Session = Depends(get_db),
+    user_id: UUID = Depends(get_current_user)
+):
+    """
+    Register a custom domain for the user.
+    
+    The domain will be validated via DNS resolution.
+    Users can have up to 5 custom domains.
+    
+    Args:
+        request: FastAPI request object
+        domain_request: Domain registration request
+        db: Database session
+        user_id: Authenticated user ID
+        
+    Returns:
+        DomainResponse: Registered domain data
+        
+    Raises:
+        HTTPException: If domain is invalid, already taken, or user has too many
+    """
+    # Check domain count per user (max 5)
+    domain_count = db.query(CustomDomain).filter(
+        CustomDomain.user_id == user_id
+    ).count()
+    
+    if domain_count >= 5:
+        raise HTTPException(
+            status_code=429,
+            detail="Maximum 5 custom domains per user"
+        )
+    
+    # Check if domain already exists
+    existing_domain = db.query(CustomDomain).filter(
+        CustomDomain.domain == domain_request.domain
+    ).first()
+    
+    if existing_domain:
+        raise HTTPException(
+            status_code=409,
+            detail="Domain already registered by another user"
+        )
+    
+    # Validate domain format
+    if not is_valid_domain_format(domain_request.domain):
+        raise HTTPException(
+            status_code=422,
+            detail="Invalid domain format"
+        )
+    
+    # Validate DNS resolution
+    dns_valid, dns_message = validate_domain_dns(domain_request.domain)
+    
+    if not dns_valid:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Domain validation failed: {dns_message}"
+        )
+    
+    # Create domain record
+    domain = CustomDomain(
+        user_id=user_id,
+        domain=domain_request.domain,
+        is_verified=True,
+        verified_at=datetime.now(timezone.utc),
+        is_primary=domain_request.set_as_primary
+    )
+    
+    # If setting as primary, unset other primary domains
+    if domain_request.set_as_primary:
+        db.query(CustomDomain).filter(
+            CustomDomain.user_id == user_id,
+            CustomDomain.is_primary == True
+        ).update({"is_primary": False})
+    
+    db.add(domain)
+    db.commit()
+    db.refresh(domain)
+    
+    # Log audit event
+    audit = AuditLog(
+        user_id=user_id,
+        action="REGISTER_DOMAIN",
+        resource_type="DOMAIN",
+        resource_id=str(domain.id),
+        ip_address=request.client.host if hasattr(request, 'client') else None,
+        details={"domain": domain_request.domain}
+    )
+    db.add(audit)
+    db.commit()
+    
+    return {
+        "id": domain.id,
+        "domain": domain.domain,
+        "is_verified": domain.is_verified,
+        "is_primary": domain.is_primary,
+        "created_at": domain.created_at.isoformat(),
+        "verified_at": domain.verified_at.isoformat() if domain.verified_at else None
+    }
+
+
+@app.get(
+    "/api/v1/domains",
+    response_model=List[DomainResponse],
+    tags=["Domains"],
+    summary="List User's Custom Domains",
+    description="Returns all custom domains registered by the authenticated user"
+)
+@limiter.limit("300/15 minutes")
+async def list_domains(
+    request: Request,
+    db: Session = Depends(get_db),
+    user_id: UUID = Depends(get_current_user)
+):
+    """
+    List all custom domains for the authenticated user.
+    
+    Returns:
+        List[DomainResponse]: User's custom domains
+    """
+    domains = db.query(CustomDomain).filter(
+        CustomDomain.user_id == user_id
+    ).order_by(CustomDomain.created_at.desc()).all()
+    
+    return [
+        {
+            "id": d.id,
+            "domain": d.domain,
+            "is_verified": d.is_verified,
+            "is_primary": d.is_primary,
+            "created_at": d.created_at.isoformat(),
+            "verified_at": d.verified_at.isoformat() if d.verified_at else None
+        }
+        for d in domains
+    ]
+
+
+@app.get(
+    "/api/v1/domains/{domain_id}",
+    response_model=DomainResponse,
+    tags=["Domains"],
+    summary="Get Domain Details",
+    description="Retrieves details about a specific custom domain"
+)
+@limiter.limit("300/15 minutes")
+async def get_domain(
+    request: Request,
+    domain_id: int,
+    db: Session = Depends(get_db),
+    user_id: UUID = Depends(get_current_user)
+):
+    """
+    Get details about a specific custom domain.
+    
+    Args:
+        request: FastAPI request object
+        domain_id: Domain ID
+        db: Database session
+        user_id: Authenticated user ID
+        
+    Returns:
+        DomainResponse: Domain details
+        
+    Raises:
+        HTTPException: If domain not found or doesn't belong to user
+    """
+    domain = db.query(CustomDomain).filter(
+        CustomDomain.id == domain_id,
+        CustomDomain.user_id == user_id
+    ).first()
+    
+    if not domain:
+        raise HTTPException(status_code=404, detail="Domain not found")
+    
+    return {
+        "id": domain.id,
+        "domain": domain.domain,
+        "is_verified": domain.is_verified,
+        "is_primary": domain.is_primary,
+        "created_at": domain.created_at.isoformat(),
+        "verified_at": domain.verified_at.isoformat() if domain.verified_at else None
+    }
+
+
+@app.delete(
+    "/api/v1/domains/{domain_id}",
+    status_code=204,
+    tags=["Domains"],
+    summary="Delete Custom Domain",
+    description="Deletes a custom domain"
+)
+@limiter.limit("300/15 minutes")
+async def delete_domain(
+    request: Request,
+    domain_id: int,
+    db: Session = Depends(get_db),
+    user_id: UUID = Depends(get_current_user)
+):
+    """
+    Delete a custom domain.
+    
+    Args:
+        request: FastAPI request object
+        domain_id: Domain ID
+        db: Database session
+        user_id: Authenticated user ID
+        
+    Raises:
+        HTTPException: If domain not found or doesn't belong to user
+    """
+    domain = db.query(CustomDomain).filter(
+        CustomDomain.id == domain_id,
+        CustomDomain.user_id == user_id
+    ).first()
+    
+    if not domain:
+        raise HTTPException(status_code=404, detail="Domain not found")
+    
+    db.delete(domain)
+    db.commit()
+    
+    # Log audit event
+    audit = AuditLog(
+        user_id=user_id,
+        action="DELETE_DOMAIN",
+        resource_type="DOMAIN",
+        resource_id=str(domain_id),
+        ip_address=request.client.host if hasattr(request, 'client') else None,
+        details={"domain": domain.domain}
+    )
+    db.add(audit)
+    db.commit()
+
+
+@app.patch(
+    "/api/v1/domains/{domain_id}/set-primary",
+    response_model=DomainResponse,
+    tags=["Domains"],
+    summary="Set Domain as Primary",
+    description="Set a custom domain as the primary domain for this user"
+)
+@limiter.limit("300/15 minutes")
+async def set_primary_domain(
+    request: Request,
+    domain_id: int,
+    db: Session = Depends(get_db),
+    user_id: UUID = Depends(get_current_user)
+):
+    """
+    Set a custom domain as the primary domain.
+    
+    Only one domain can be primary per user.
+    
+    Args:
+        request: FastAPI request object
+        domain_id: Domain ID to set as primary
+        db: Database session
+        user_id: Authenticated user ID
+        
+    Returns:
+        DomainResponse: Updated domain data
+        
+    Raises:
+        HTTPException: If domain not found or doesn't belong to user
+    """
+    domain = db.query(CustomDomain).filter(
+        CustomDomain.id == domain_id,
+        CustomDomain.user_id == user_id
+    ).first()
+    
+    if not domain:
+        raise HTTPException(status_code=404, detail="Domain not found")
+    
+    # Unset other primary domains
+    db.query(CustomDomain).filter(
+        CustomDomain.user_id == user_id,
+        CustomDomain.is_primary == True,
+        CustomDomain.id != domain_id
+    ).update({"is_primary": False})
+    
+    domain.is_primary = True
+    db.commit()
+    db.refresh(domain)
+    
+    return {
+        "id": domain.id,
+        "domain": domain.domain,
+        "is_verified": domain.is_verified,
+        "is_primary": domain.is_primary,
+        "created_at": domain.created_at.isoformat(),
+        "verified_at": domain.verified_at.isoformat() if domain.verified_at else None
+    }
 
 # ============================================================================
 # Redirect Endpoint (Catch-all)
