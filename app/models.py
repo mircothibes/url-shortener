@@ -319,6 +319,38 @@ class WebhookLog(Base):
         return f"<WebhookLog(webhook_id={self.webhook_id}, event_type={self.event_type}, success={self.success})>"
 
 
+# ============================================================================
+# CUSTOM DOMAIN MODEL
+# ============================================================================
 
+class CustomDomain(Base):
+    """User custom domain for URL shortening"""
+
+    __tablename__ = "custom_domains"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    domain = Column(String(255), unique=True, nullable=False, index=True)
+    is_verified = Column(Boolean, default=False, nullable=False, index=True)
+    is_primary = Column(Boolean, default=False, nullable=False)
+    created_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+        index=True,
+    )
+    verified_at = Column(DateTime(timezone=True), nullable=True)
+    last_checked_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Relationships
+    user = relationship("User", backref="custom_domains")
+
+    def __repr__(self):
+        return f"<CustomDomain(domain={self.domain}, verified={self.is_verified})>"
 
 
