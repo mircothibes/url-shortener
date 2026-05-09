@@ -1297,7 +1297,33 @@ async def redirect_to_original(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    """Redirect to original URL"""
+    """
+    Redirect to original URL.
+    
+    Supports both default domain and custom domains.
+    Custom domain must belong to the same user who created the URL.
+    
+    Args:
+        short_code: Short code to redirect
+        request: FastAPI request object
+        db: Database session
+        
+    Returns:
+        RedirectResponse: Redirect to original URL
+        
+    Raises:
+        HTTPException: If URL not found, expired, or domain mismatch
+    """
+    # Get the domain from Host header
+    host_header = request.headers.get("host", "").lower()
+    
+    # Extract domain (remove port if present)
+    if ":" in host_header:
+        request_domain = host_header.split(":")[0]
+    else:
+        request_domain = host_header
+    
+    # Find URL by short code
     url = db.query(URL).filter(URL.short_code == short_code).first()
     
     if not url:
@@ -1309,6 +1335,24 @@ async def redirect_to_original(
     if url.expires_at and url.expires_at < datetime.now(timezone.utc):
         raise HTTPException(status_code=410, detail="URL has expired")
     
+    # Validate domain if it's a custom domain
+    if request_domain != "localhost" and request_domain != "127.0.0.1":
+        # Check if it's a custom domain
+        custom_domain = db.query(CustomDomain).filter(
+            CustomDomain.domain == request_domain,
+            CustomDomain.is_verified == True
+        ).first()
+        
+        if custom_domain:
+            # Custom domain found - verify it belongs to same user
+            if custom_domain.user_id != url.user_id:
+                raise HTTPException(
+                    status_code=403,
+                    detail="This domain does not have access to this URL"
+                )
+        # If not a custom domain and not localhost, allow (could be default domain)
+    
+    # Password protection
     if url.password_hash:
         password = request.query_params.get("password")
         if not password:
@@ -1318,8 +1362,9 @@ async def redirect_to_original(
         try:
             pwd_hasher.verify(url.password_hash, password)
         except VerifyMismatchError:
-            raise HTTPException(status_code=401, detail="Invalid password") 
+            raise HTTPException(status_code=401, detail="Invalid password")
     
+    # Record click
     ip_addr = "127.0.0.1"
     if request.client and request.client.host not in ["testclient"]:
         ip_addr = str(request.client.host)
@@ -1334,13 +1379,13 @@ async def redirect_to_original(
     db.add(click)
     url.total_clicks += 1
     db.commit()
-
+    
     # Trigger webhook event
     click_data = {
         "ip_address": ip_addr,
-        "country": None,
-        "device_type": None  
-     }
+        "country": None,  # Could add geolocation here
+        "device_type": None  # Could add device detection here
+    }
     trigger_url_clicked_event(url.id, click_data)
     
     return RedirectResponse(url=url.original_url, status_code=307)
