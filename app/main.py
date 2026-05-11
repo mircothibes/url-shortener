@@ -43,6 +43,7 @@ from app.models import Webhook, WebhookLog
 from app.tasks import trigger_url_created_event, trigger_url_clicked_event, trigger_url_deleted_event
 from app.domains import DomainCreateRequest, DomainResponse, validate_domain_dns, is_valid_domain_format
 from app.models import CustomDomain
+from app.expiration import ExpirationPolicyType, check_if_expired, check_if_expiring_soon, get_time_until_expiration
 
 # ============================================================================
 # FastAPI Application Setup
@@ -86,6 +87,9 @@ class URLCreateRequest(BaseModel):
     original_url: str
     custom_slug: Optional[str] = None
     expires_at: Optional[datetime] = None
+    expires_after_days: Optional[int] = None
+    expires_after_clicks: Optional[int] = None
+    expiration_policy: str = "date"  # "date", "days", "clicks", "combined"
     password: Optional[str] = None
     tags: Optional[List[str]] = None
     description: Optional[str] = None
@@ -265,14 +269,25 @@ async def create_short_url(
             if not existing:
                 break
     
+    # Validate expiration policy
+    if request.expiration_policy not in ["date", "days", "clicks", "combined"]:
+        raise HTTPException(
+            status_code=422,
+            detail="Invalid expiration_policy. Must be: date, days, clicks, or combined"
+        )
+    
+    # Create URL record
     url = URL(
         short_code=short_code,
         original_url=original_url,
         user_id=user_id,
-        expires_at=url_request.expires_at,
-        description=url_request.description,
-        tags=url_request.tags or []
-    )
+        expires_at=request.expires_at,
+        expires_after_days=request.expires_after_days,
+        expires_after_clicks=request.expires_after_clicks,
+        expiration_policy=request.expiration_policy,
+        description=request.description,
+        tags=request.tags or []
+    ) 
     
     if url_request.password:
         pwd_hasher = PasswordHasher()
@@ -483,6 +498,49 @@ async def delete_url(
     # Trigger webhook event
     trigger_url_deleted_event(url_id, short_code, original_url, str(user_id))
 
+@app.get(
+    "/api/v1/urls/{url_id}/expiration",
+    tags=["URLs"],
+    summary="Get URL Expiration Status",
+    description="Get expiration policy and time remaining for a URL"
+)
+@limiter.limit("300/15 minutes")
+async def get_expiration_status(
+    request: Request,
+    url_id: int,
+    db: Session = Depends(get_db),
+    user_id: UUID = Depends(get_current_user)
+):
+    """
+    Get expiration policy and status for a URL.
+    
+    Returns:
+        dict: Expiration policy details and time remaining
+    """
+    url = db.query(URL).filter(
+        URL.id == url_id,
+        URL.user_id == user_id
+    ).first()
+    
+    if not url:
+        raise HTTPException(status_code=404, detail="URL not found")
+    
+    is_expired, expiration_reason = check_if_expired(url, url.total_clicks)
+    is_expiring_soon, expiring_soon_reason = check_if_expiring_soon(url)
+    
+    return {
+        "expiration_policy": url.expiration_policy,
+        "expires_at": url.expires_at.isoformat() if url.expires_at else None,
+        "expires_after_days": url.expires_after_days,
+        "expires_after_clicks": url.expires_after_clicks,
+        "is_expired": is_expired,
+        "expiration_reason": expiration_reason if is_expired else None,
+        "is_expiring_soon": is_expiring_soon,
+        "expiring_soon_reason": expiring_soon_reason if is_expiring_soon else None,
+        "time_remaining": get_time_until_expiration(url, url.total_clicks),
+        "expired_at": url.expired_at.isoformat() if url.expired_at else None,
+        "expiring_soon_notified": url.expiring_soon_notified
+    }
 
 @app.post(
     "/api/v1/urls/batch",
@@ -1332,8 +1390,36 @@ async def redirect_to_original(
     if not url.is_active:
         raise HTTPException(status_code=410, detail="URL is no longer available")
     
-    if url.expires_at and url.expires_at < datetime.now(timezone.utc):
-        raise HTTPException(status_code=410, detail="URL has expired")
+    # Check expiration based on policy
+    is_expired, expiration_reason = check_if_expired(url, url.total_clicks)
+    if is_expired:
+        url.is_active = False
+        url.expired_at = datetime.now(timezone.utc)
+        db.commit()
+        
+        # Trigger webhook event
+        from app.tasks import trigger_url_deleted_event
+        trigger_url_deleted_event(url.id, url.short_code, url.original_url, str(url.user_id))
+        
+        raise HTTPException(status_code=410, detail=f"URL has expired: {expiration_reason}")
+    
+    # Check if expiring soon and send notification
+    is_expiring_soon, _ = check_if_expiring_soon(url)
+    if is_expiring_soon and not url.expiring_soon_notified:
+        url.expiring_soon_notified = True
+        db.commit()
+        
+        # Trigger webhook event
+        from app.tasks import dispatch_event_to_all_webhooks
+        event_payload = {
+            "event_type": "url.expiring_soon",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "url_id": url.id,
+            "short_code": url.short_code,
+            "original_url": url.original_url,
+            "time_until_expiration": get_time_until_expiration(url, url.total_clicks)
+        }
+        dispatch_event_to_all_webhooks.delay(str(url.user_id), "url.expiring_soon", event_payload) 
     
     # Validate domain if it's a custom domain
     if request_domain != "localhost" and request_domain != "127.0.0.1":
