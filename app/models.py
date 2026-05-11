@@ -85,8 +85,16 @@ class URL(Base):
         onupdate=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
+    # Expiration policies
     expires_at = Column(DateTime(timezone=True), nullable=True)
+    expires_after_days = Column(BigInteger, nullable=True)  # Expire X days after creation
+    expires_after_clicks = Column(BigInteger, nullable=True)  # Expire after X clicks
+    expiration_policy = Column(String(50), default="date", nullable=False)  # "date", "days", "clicks", "combined"
+    
+    # Expiration tracking
     is_active = Column(Boolean, default=True, nullable=False, index=True)
+    expired_at = Column(DateTime(timezone=True), nullable=True)  # When it actually expired
+    expiring_soon_notified = Column(Boolean, default=False, nullable=False)  # Webhook sent? 
     password_hash = Column(String(255), nullable=True)
     description = Column(Text, nullable=True)
     tags = Column(JSONB, default=list, nullable=False)
