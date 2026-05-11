@@ -270,7 +270,7 @@ async def create_short_url(
                 break
     
     # Validate expiration policy
-    if request.expiration_policy not in ["date", "days", "clicks", "combined"]:
+    if url_request.expiration_policy not in ["date", "days", "clicks", "combined"]:
         raise HTTPException(
             status_code=422,
             detail="Invalid expiration_policy. Must be: date, days, clicks, or combined"
@@ -281,17 +281,17 @@ async def create_short_url(
         short_code=short_code,
         original_url=original_url,
         user_id=user_id,
-        expires_at=request.expires_at,
-        expires_after_days=request.expires_after_days,
-        expires_after_clicks=request.expires_after_clicks,
-        expiration_policy=request.expiration_policy,
-        description=request.description,
-        tags=request.tags or []
-    ) 
+        expires_at=url_request.expires_at,
+        expires_after_days=url_request.expires_after_days,
+        expires_after_clicks=url_request.expires_after_clicks,
+        expiration_policy=url_request.expiration_policy,
+        description=url_request.description,
+        tags=url_request.tags or []
+    )
     
     if url_request.password:
         pwd_hasher = PasswordHasher()
-        url.password_hash = pwd_hasher.hash(url_request.password) 
+        url.password_hash = pwd_hasher.hash(url_request.password)
     
     db.add(url)
     db.commit()
@@ -311,7 +311,7 @@ async def create_short_url(
     # Trigger webhook event
     trigger_url_created_event(url.id)
     
-    return url
+    return url        
 
 
 @app.get(
