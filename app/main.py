@@ -726,16 +726,19 @@ async def get_analytics(
     if not url:
         raise HTTPException(status_code=404, detail="URL not found")
     
-    clicks = db.query(Click).filter(Click.url_id == url_id).all()
-    
-    device_breakdown = {}
-    country_breakdown = {}
-    
-    for click in clicks:
-        if click.device_type:
-            device_breakdown[click.device_type] = device_breakdown.get(click.device_type, 0) + 1
-        if click.country:
-            country_breakdown[click.country] = country_breakdown.get(click.country, 0) + 1
+    # Get device breakdown (SQL aggregation, not Python loop)
+    device_stats = db.query(
+        Click.device_type,
+        func.count(Click.id).label('count')
+    ).filter(Click.url_id == url_id).group_by(Click.device_type).all()
+    device_breakdown = {d[0]: d[1] for d in device_stats if d[0]}
+
+    # Get country breakdown (SQL aggregation, not Python loop)
+    country_stats = db.query(
+        Click.country,
+        func.count(Click.id).label('count')
+    ).filter(Click.url_id == url_id).group_by(Click.country).all()
+    country_breakdown = {c[0]: c[1] for c in country_stats if c[0]}       
     
     top_country = max(country_breakdown, key=country_breakdown.get) if country_breakdown else None
     top_device = max(device_breakdown, key=device_breakdown.get) if device_breakdown else None
