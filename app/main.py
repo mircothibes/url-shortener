@@ -1384,8 +1384,35 @@ async def redirect_to_original(
     else:
         request_domain = host_header
     
-    # Find URL by short code
-    url = db.query(URL).filter(URL.short_code == short_code).first()
+    # Try cache first
+    from app.cache import cache_get, cache_set
+    cache_key = f"url:{short_code}"
+    url = cache_get(cache_key)
+
+    if not url:
+        # Cache miss: query DB
+        url_obj = db.query(URL).filter(URL.short_code == short_code).first()
+        if url_obj:
+            # Convert to dict for caching
+            url_dict = {
+                "id": url_obj.id,
+                "short_code": url_obj.short_code,
+                "original_url": url_obj.original_url,
+                "user_id": str(url_obj.user_id),
+                "is_active": url_obj.is_active,
+                "password_hash": url_obj.password_hash,
+                "total_clicks": url_obj.total_clicks,
+                "expires_at": url_obj.expires_at.isoformat() if url_obj.expires_at else None,
+                "expires_after_days": url_obj.expires_after_days,
+                "expires_after_clicks": url_obj.expires_after_clicks,
+                "expiration_policy": url_obj.expiration_policy,
+                "expired_at": url_obj.expired_at.isoformat() if url_obj.expired_at else None,
+                "expiring_soon_notified": url_obj.expiring_soon_notified,
+            }
+            cache_set(cache_key, url_dict, ttl=3600)  # Cache for 1 hour
+            url = url_dict
+        else:
+            url = None    
     
     if not url:
         raise HTTPException(status_code=404, detail="URL not found")
