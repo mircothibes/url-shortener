@@ -93,7 +93,19 @@ class URLCreateRequest(BaseModel):
     password: Optional[str] = None
     tags: Optional[List[str]] = None
     description: Optional[str] = None
-
+    
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "original_url": "https://github.com/mircothibes",
+                "custom_slug": "my-github",
+                "expiration_policy": "days",
+                "expires_after_days": 30,
+                "tags": ["portfolio", "github"],
+                "description": "My GitHub profile"
+            }
+        }
+    )
 
 class URLResponse(BaseModel):
     """Response model for URL data"""
@@ -105,8 +117,22 @@ class URLResponse(BaseModel):
     is_active: bool
     expires_at: Optional[datetime] = None
     description: Optional[str] = None
-
-    model_config = ConfigDict(from_attributes=True)
+    
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
+            "example": {
+                "id": 1,
+                "short_code": "abc123",
+                "original_url": "https://github.com/mircothibes",
+                "created_at": "2026-05-18T10:30:00Z",
+                "total_clicks": 42,
+                "is_active": True,
+                "expires_at": "2026-06-18T10:30:00Z",
+                "description": "My GitHub profile"
+            }
+        }
+    )
 
 
 class AnalyticsResponse(BaseModel):
