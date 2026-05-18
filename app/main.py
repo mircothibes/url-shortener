@@ -219,7 +219,14 @@ async def health_check():
     response_model=URLResponse,
     tags=["URLs"],
     summary="Create Shortened URL",
-    description="Creates a new shortened URL with unique short code and optional customization"
+    description="Creates a new shortened URL with unique short code and optional customization",
+    responses={
+        201: {"description": "URL created successfully"},
+        400: {"description": "Invalid URL format"},
+        409: {"description": "Custom slug already exists"},
+        422: {"description": "Validation error"},
+        429: {"description": "Rate limit exceeded"},
+    }
 )
 @limiter.limit("100/15 minutes")
 async def create_short_url(
@@ -1351,7 +1358,20 @@ async def set_primary_domain(
 # Redirect Endpoint (Catch-all)
 # ============================================================================
 
-@app.get("/{short_code}", tags=["Redirects"])
+@app.get(
+    "/{short_code}",
+    tags=["Redirects"],
+    summary="Redirect to Original URL",
+    description="Redirects to the original URL. Supports custom domains, password protection, and expiration policies.",
+    responses={
+        307: {"description": "Temporary redirect to original URL"},
+        401: {"description": "Password required or invalid"},
+        403: {"description": "Domain access denied"},
+        404: {"description": "URL not found"},
+        410: {"description": "URL has expired or is no longer available"},
+        429: {"description": "Rate limit exceeded"},
+    }
+)
 @limiter.limit("1000/15 minutes")
 async def redirect_to_original(
     short_code: str,
