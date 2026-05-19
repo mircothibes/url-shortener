@@ -1531,22 +1531,33 @@ async def redirect_to_original(
     if request.client and request.client.host not in ["testclient"]:
         ip_addr = str(request.client.host)
     
+    # Get geolocation from IP
+    from app.geolocation import get_location_from_ip
+    location = get_location_from_ip(ip_addr)
+
     click = Click(
-        url_id=url.id,
-        clicked_at=datetime.now(timezone.utc),
-        ip_address=ip_addr,
-        user_agent=request.headers.get("user-agent"),
-        referrer=request.headers.get("referer")
-    )
+            url_id=url.id,
+            clicked_at=datetime.now(timezone.utc),
+            ip_address=ip_addr,
+            user_agent=request.headers.get("user-agent"),
+            referrer=request.headers.get("referer"),
+            country=location.get("country"),
+            region=location.get("region"),
+            city=location.get("city"),
+            latitude=location.get("latitude"),
+            longitude=location.get("longitude")
+        )
     db.add(click)
     url.total_clicks += 1
     db.commit()
-    
     # Trigger webhook event
     click_data = {
         "ip_address": ip_addr,
-        "country": None,  # Could add geolocation here
-        "device_type": None  # Could add device detection here
+        "country": location.get("country"),
+        "region": location.get("region"),
+        "city": location.get("city"),
+        "latitude": location.get("latitude"),
+        "longitude": location.get("longitude")
     }
     trigger_url_clicked_event(url.id, click_data)
     
