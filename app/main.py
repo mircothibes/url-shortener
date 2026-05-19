@@ -143,6 +143,8 @@ class AnalyticsResponse(BaseModel):
     top_device: Optional[str] = None
     device_breakdown: dict
     country_breakdown: dict
+    city_breakdown: dict = {}
+    top_referrers: dict = {}
 
 
 # ============================================================================
@@ -780,14 +782,32 @@ async def get_analytics(
         Click.url_id == url_id
     ).scalar() or 0
     
+    # Get city breakdown
+    city_stats = db.query(
+        Click.city,
+        func.count(Click.id).label('count')
+    ).filter(Click.url_id == url_id).group_by(Click.city).all()
+    city_breakdown = {c[0]: c[1] for c in city_stats if c[0]}
+    
+    # Get top referrers
+    referrer_stats = db.query(
+        Click.referrer,
+        func.count(Click.id).label('count')
+    ).filter(Click.url_id == url_id).group_by(Click.referrer).order_by(
+        func.count(Click.id).desc()
+    ).limit(5).all()
+    top_referrers = {r[0]: r[1] for r in referrer_stats if r[0]}
+    
     return {
         "total_clicks": url.total_clicks,
         "unique_visitors": unique_ips,
         "top_country": top_country,
         "top_device": top_device,
         "device_breakdown": device_breakdown,
-        "country_breakdown": country_breakdown
-    }
+        "country_breakdown": country_breakdown,
+        "city_breakdown": city_breakdown,
+        "top_referrers": top_referrers
+    }        
 
 # ============================================================================
 # Webhook Endpoints
