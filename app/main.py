@@ -1673,6 +1673,57 @@ async def redirect_to_original(
     
     return RedirectResponse(url=url.original_url, status_code=307)
 
+@app.patch(
+    "/api/v1/admin/users/{target_user_id}/rate-limits",
+    tags=["Admin"],
+    summary="Update User Rate Limits (Admin Only)",
+    description="Admin endpoint to update rate limits for any user"
+)
+@limiter.limit("50/1 hour")
+async def admin_update_rate_limit(
+    request: Request,
+    target_user_id: UUID,
+    create_url_limit: Optional[str] = None,
+    list_urls_limit: Optional[str] = None,
+    analytics_limit: Optional[str] = None,
+    redirect_limit: Optional[str] = None,
+    db: Session = Depends(get_db),
+    user_id: UUID = Depends(get_current_user)
+):
+    """Admin: Update rate limits for a user"""
+    
+    # Simple admin check (in production, use proper role-based access)
+    admin_users = os.getenv("ADMIN_USER_IDS", "").split(",")
+    if str(user_id) not in admin_users:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    user_limit = db.query(UserRateLimit).filter(UserRateLimit.user_id == target_user_id).first()
+    
+    if not user_limit:
+        user_limit = UserRateLimit(user_id=target_user_id)
+        db.add(user_limit)
+    
+    if create_url_limit:
+        user_limit.create_url_limit = create_url_limit
+    if list_urls_limit:
+        user_limit.list_urls_limit = list_urls_limit
+    if analytics_limit:
+        user_limit.analytics_limit = analytics_limit
+    if redirect_limit:
+        user_limit.redirect_limit = redirect_limit
+    
+    user_limit.updated_at = datetime.now(timezone.utc)
+    db.commit()
+    
+    return {
+        "user_id": str(target_user_id),
+        "create_url_limit": user_limit.create_url_limit,
+        "list_urls_limit": user_limit.list_urls_limit,
+        "analytics_limit": user_limit.analytics_limit,
+        "redirect_limit": user_limit.redirect_limit,
+        "updated_at": user_limit.updated_at.isoformat()
+    }
+
 
 # ============================================================================
 # Exception Handlers
