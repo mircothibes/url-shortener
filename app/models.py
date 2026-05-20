@@ -361,4 +361,25 @@ class CustomDomain(Base):
     def __repr__(self):
         return f"<CustomDomain(domain={self.domain}, verified={self.is_verified})>"
 
+class UserRateLimit(Base):
+    """Custom rate limits per user"""
+    __tablename__ = "user_rate_limits"
+    
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id = Column(
+        UUID,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+        index=True
+    )
+    create_url_limit = Column(String(50), default="100/15 minutes", nullable=False)
+    list_urls_limit = Column(String(50), default="300/15 minutes", nullable=False)
+    analytics_limit = Column(String(50), default="300/15 minutes", nullable=False)
+    redirect_limit = Column(String(50), default="1000/15 minutes", nullable=False)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
+    
+    user = relationship("User", backref="rate_limit_config")    
+
 
