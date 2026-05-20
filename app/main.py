@@ -22,7 +22,7 @@ from app.rate_limit import limiter, rate_limit_error_handler
 from slowapi.errors import RateLimitExceeded
 
 from app.database import SessionLocal
-from app.models import User, URL, Click, AuditLog
+from app.models import User, URL, Click, AuditLog, UserRateLimit
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
@@ -1398,6 +1398,96 @@ async def set_primary_domain(
         "is_primary": domain.is_primary,
         "created_at": domain.created_at.isoformat(),
         "verified_at": domain.verified_at.isoformat() if domain.verified_at else None
+    }
+
+# ============================================================================
+# Rate Limit Management Endpoints
+# ============================================================================
+
+@app.post(
+    "/api/v1/rate-limits",
+    status_code=201,
+    tags=["Rate Limits"],
+    summary="Set Custom Rate Limit",
+    description="Set custom rate limits for the authenticated user"
+)
+@limiter.limit("10/1 hour")
+async def set_rate_limit(
+    request: Request,
+    create_url_limit: str = "100/15 minutes",
+    list_urls_limit: str = "300/15 minutes",
+    analytics_limit: str = "300/15 minutes",
+    redirect_limit: str = "1000/15 minutes",
+    db: Session = Depends(get_db),
+    user_id: UUID = Depends(get_current_user)
+):
+    """Set custom rate limits for current user"""
+    
+    # Check if user already has rate limit config
+    user_limit = db.query(UserRateLimit).filter(UserRateLimit.user_id == user_id).first()
+    
+    if user_limit:
+        user_limit.create_url_limit = create_url_limit
+        user_limit.list_urls_limit = list_urls_limit
+        user_limit.analytics_limit = analytics_limit
+        user_limit.redirect_limit = redirect_limit
+        user_limit.updated_at = datetime.now(timezone.utc)
+        db.commit()
+    else:
+        user_limit = UserRateLimit(
+            user_id=user_id,
+            create_url_limit=create_url_limit,
+            list_urls_limit=list_urls_limit,
+            analytics_limit=analytics_limit,
+            redirect_limit=redirect_limit
+        )
+        db.add(user_limit)
+        db.commit()
+    
+    return {
+        "user_id": str(user_id),
+        "create_url_limit": user_limit.create_url_limit,
+        "list_urls_limit": user_limit.list_urls_limit,
+        "analytics_limit": user_limit.analytics_limit,
+        "redirect_limit": user_limit.redirect_limit,
+        "updated_at": user_limit.updated_at.isoformat()
+    }
+
+
+@app.get(
+    "/api/v1/rate-limits",
+    tags=["Rate Limits"],
+    summary="Get Current Rate Limits",
+    description="Get rate limits for the authenticated user"
+)
+@limiter.limit("300/15 minutes")
+async def get_rate_limit(
+    request: Request,
+    db: Session = Depends(get_db),
+    user_id: UUID = Depends(get_current_user)
+):
+    """Get current rate limits for user"""
+    
+    user_limit = db.query(UserRateLimit).filter(UserRateLimit.user_id == user_id).first()
+    
+    if not user_limit:
+        # Return defaults
+        return {
+            "user_id": str(user_id),
+            "create_url_limit": "100/15 minutes",
+            "list_urls_limit": "300/15 minutes",
+            "analytics_limit": "300/15 minutes",
+            "redirect_limit": "1000/15 minutes",
+            "message": "Using default limits"
+        }
+    
+    return {
+        "user_id": str(user_id),
+        "create_url_limit": user_limit.create_url_limit,
+        "list_urls_limit": user_limit.list_urls_limit,
+        "analytics_limit": user_limit.analytics_limit,
+        "redirect_limit": user_limit.redirect_limit,
+        "updated_at": user_limit.updated_at.isoformat()
     }
 
 # ============================================================================
