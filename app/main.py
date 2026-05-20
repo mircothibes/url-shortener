@@ -1424,7 +1424,7 @@ async def set_rate_limit(
     """Set custom rate limits for current user"""
     
     # Check if user already has rate limit config
-    user_limit = db.query(UserRateLimit).filter(UserRateLimit.user_id == user_id).first()
+    user_limit = db.query(UserRateLimit).filter(UserRateLimit.user_id == str(user_id)).first()
     
     if user_limit:
         user_limit.create_url_limit = create_url_limit
@@ -1435,7 +1435,7 @@ async def set_rate_limit(
         db.commit()
     else:
         user_limit = UserRateLimit(
-            user_id=user_id,
+            user_id=str(user_id),
             create_url_limit=create_url_limit,
             list_urls_limit=list_urls_limit,
             analytics_limit=analytics_limit,
@@ -1468,7 +1468,7 @@ async def get_rate_limit(
 ):
     """Get current rate limits for user"""
     
-    user_limit = db.query(UserRateLimit).filter(UserRateLimit.user_id == user_id).first()
+    user_limit = db.query(UserRateLimit).filter(UserRateLimit.user_id == str(user_id)).first()    
     
     if not user_limit:
         # Return defaults
