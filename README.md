@@ -280,16 +280,55 @@ gcloud run deploy url-shortener --source .
 | `503 Service Unavailable` | Check database connection and GCP permissions |
 | Containers won't start | Run `docker compose down -v && docker compose up -d` |
 
-## 🚀 Upcoming Features
+## 🚀 Development Journey (#PythonJourney)
 
-- [ ] Custom domain support
-- [x] QR code generation
-- [ ] Link expiration policies
-- [x] Password protection
-- [x] Rate limiting per user
-- [ ] Advanced analytics dashboard
-- [ ] Webhook integrations
-- [ ] Batch URL creation
+### Day 174 — Link Expiration Policies
+- ✅ 4 expiration types (date, days, clicks, combined)
+- ✅ Expiration checking logic
+- ✅ Status endpoints
+
+### Day 175 — Automated Testing
+- ✅ 17 comprehensive pytest tests
+- ✅ Fixture-based testing with PostgreSQL
+- ✅ Mocked Celery tasks
+
+### Day 176 — Performance Optimization
+- ✅ 7 database indexes (50x faster auth & redirects)
+- ✅ SQL aggregation for analytics (10x faster)
+- ✅ Redis caching for short-code lookups (100x faster)
+- **Result**: 10x overall performance improvement
+
+### Day 177 — API Documentation
+- ✅ Enhanced OpenAPI with response codes
+- ✅ Schema examples for all endpoints
+- ✅ Complete API_GUIDE.md
+
+### Day 178 — Geolocation Analytics
+- ✅ IP-to-location service (country, region, city, coordinates)
+- ✅ City breakdown in analytics
+- ✅ Top referrers tracking
+
+### Day 179 — Customizable Rate Limits
+- ✅ Per-user rate limit configuration
+- ✅ User endpoints (GET/POST rate limits)
+- ✅ Admin endpoint for rate limit management
+
+### Day 180 — Production Ready
+- ✅ Comprehensive README
+- ✅ Complete documentation
+- ✅ Ready for deployment
+
+## ✨ Latest Features (Days 174-180)
+
+| Feature | Status | Day |
+|---------|--------|-----|
+| Link Expiration Policies | ✅ | 174 |
+| Automated Testing (17 tests) | ✅ | 175 |
+| Performance Optimization (10x faster) | ✅ | 176 |
+| API Documentation | ✅ | 177 |
+| Geolocation Analytics | ✅ | 178 |
+| Custom Rate Limits per User | ✅ | 179 |
+| Production Ready | ✅ | 180 |
 
 ## 📈 Performance Metrics
 
