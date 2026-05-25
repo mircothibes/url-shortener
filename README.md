@@ -315,10 +315,7 @@ url-shortener/
 
 ## 👨‍💻 Author
 
-**Marcos (mircothibes)**
-- GitHub: https://github.com/mircothibes
-- LinkedIn: https://linkedin.com/in/marcosvtkemer
-- Location: Luxembourg 🇱🇺
+**Marcos Vinicius Thibes Kemer (mircothibes)**
 
 ## 📄 License
 
