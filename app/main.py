@@ -154,14 +154,17 @@ class AnalyticsResponse(BaseModel):
 def get_db():
     """
     Dependency function to get database session.
-    
     """
-    db = SessionLocal()
-    try:        
+    try:
+        db = SessionLocal()
+        print(f"DEBUG: db = {db}, type = {type(db)}")
         yield db
     except HTTPException:
-        raise    
+        raise
     except Exception as e:
+        import traceback
+        print(f"ERROR in get_db: {str(e)}")
+        traceback.print_exc()
         raise HTTPException(
             status_code=503,
             detail=f"Database unavailable: {str(e)}"
@@ -1573,15 +1576,20 @@ async def redirect_to_original(
     if not url:
         raise HTTPException(status_code=404, detail="URL not found")
     
+    # Handle both dict (from cache) and object (from DB)
+    url_is_active = url.get('is_active') if isinstance(url, dict) else url.is_active
     if not url.is_active:
         raise HTTPException(status_code=410, detail="URL is no longer available")
     
     # Check expiration based on policy
     is_expired, expiration_reason = check_if_expired(url, url.total_clicks)
     if is_expired:
-        url.is_active = False
-        url.expired_at = datetime.now(timezone.utc)
-        db.commit()
+        # Update in database
+        url_obj = db.query(URL).filter(URL.short_code == short_code).first()
+        if url_obj:
+            url_obj.is_active = False
+            url_obj.expired_at = datetime.now(timezone.utc)
+            db.commit()
         
         # Trigger webhook event
         from app.tasks import trigger_url_deleted_event
