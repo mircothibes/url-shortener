@@ -280,7 +280,7 @@ idx_audit_logs_user_id — Audit trail
 | Tests fail locally | Restart Docker: `docker compose down -v && docker compose up -d` |
 
 ## 📁 Project Structure
-
+```bash
 url-shortener/
 ├── app/
 │   ├── main.py              # FastAPI app & 20+ endpoints
@@ -302,6 +302,7 @@ url-shortener/
 ├── Dockerfile               # Container image
 ├── docker-compose.yml       # Local development
 └── README.md                # This file
+```
 
 ## 🚀 Next Steps
 
