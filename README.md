@@ -280,3 +280,47 @@ idx_audit_logs_user_id — Audit trail
 | Tests fail locally | Restart Docker: `docker compose down -v && docker compose up -d` |
 
 ## 📁 Project Structure
+
+url-shortener/
+├── app/
+│   ├── main.py              # FastAPI app & 20+ endpoints
+│   ├── models.py            # SQLAlchemy models
+│   ├── database.py          # Database connection
+│   ├── cache.py             # Redis utilities
+│   ├── geolocation.py       # IP geolocation service
+│   ├── expiration.py        # Link expiration logic
+│   ├── webhooks.py          # Webhook management
+│   ├── rate_limit.py        # Rate limiting config
+│   ├── API_GUIDE.md         # Complete API documentation
+│   ├── PERFORMANCE.md       # Performance details
+│   └── indexes.md           # Database indexes info
+├── tests/
+│   ├── conftest.py          # Pytest fixtures
+│   └── test_expiration.py   # 17 comprehensive tests
+├── requirements.txt         # Python dependencies
+├── pytest.ini               # Pytest configuration
+├── Dockerfile               # Container image
+├── docker-compose.yml       # Local development
+└── README.md                # This file
+
+## 🚀 Next Steps
+
+- [ ] Open source the project properly
+- [ ] Add advanced analytics dashboard
+- [ ] Custom branding options
+- [ ] Mobile app (iOS/Android)
+- [ ] API v2 with GraphQL
+- [ ] Multi-language support
+
+## 👨‍💻 Author
+
+**Marcos (mircothibes)**
+- GitHub: https://github.com/mircothibes
+- LinkedIn: https://linkedin.com/in/marcosvtkemer
+- Location: Luxembourg 🇱🇺
+
+## 📄 License
+
+MIT License — See LICENSE file for details
+
+---
