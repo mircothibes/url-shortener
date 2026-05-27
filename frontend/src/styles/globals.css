@@ -1,0 +1,96 @@
+/**
+ * Global Styles for URL Shortener Frontend
+ * 
+ * This file contains all global CSS configurations for the application.
+ * It imports Tailwind CSS directives and defines base styles that apply
+ * to the entire application.
+ * 
+ * Structure:
+ * 1. Tailwind CSS directives (base, components, utilities)
+ * 2. Reset and normalization styles
+ * 3. Custom global properties and animations
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * Universal selector reset
+ * Removes default margins and padding from all elements
+ * Sets box-sizing to border-box for consistent sizing calculations
+ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/**
+ * HTML configuration
+ * Enables smooth scrolling behavior for anchor links
+ * Improves user experience when navigating within the page
+ */
+html {
+  scroll-behavior: smooth;
+}
+
+/**
+ * Body styles
+ * Applies consistent typography and visual baseline across the application
+ * Uses system fonts for better performance and native feel
+ * Enables font smoothing for better rendering
+ */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8fafc;
+  color: #1e293b;
+  line-height: 1.5;
+}
+
+/**
+ * Link styles
+ * Removes default underline decoration
+ * Adds smooth color transition for better UX
+ */
+a {
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+/**
+ * Button reset
+ * Removes browser default button styling
+ * Provides a clean slate for custom button components
+ */
+button {
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+/**
+ * Input and textarea reset
+ * Removes browser default styling
+ * Applies consistent font and sizing
+ */
+input,
+textarea {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+/**
+ * Image optimization
+ * Ensures images are responsive and don't overflow containers
+ */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
