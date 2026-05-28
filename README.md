@@ -282,26 +282,33 @@ idx_audit_logs_user_id — Audit trail
 ## 📁 Project Structure
 ```bash
 url-shortener/
-├── app/
-│   ├── main.py              # FastAPI app & 20+ endpoints
-│   ├── models.py            # SQLAlchemy models
-│   ├── database.py          # Database connection
-│   ├── cache.py             # Redis utilities
-│   ├── geolocation.py       # IP geolocation service
-│   ├── expiration.py        # Link expiration logic
-│   ├── webhooks.py          # Webhook management
-│   ├── rate_limit.py        # Rate limiting config
-│   ├── API_GUIDE.md         # Complete API documentation
-│   ├── PERFORMANCE.md       # Performance details
-│   └── indexes.md           # Database indexes info
-├── tests/
-│   ├── conftest.py          # Pytest fixtures
-│   └── test_expiration.py   # 17 comprehensive tests
-├── requirements.txt         # Python dependencies
-├── pytest.ini               # Pytest configuration
-├── Dockerfile               # Container image
-├── docker-compose.yml       # Local development
-└── README.md                # This file
+├── app/                     # Backend (FastAPI)
+│   ├── main.py
+│   ├── models.py
+│   ├── database.py
+│   ├── cache.py
+│   ├── API_GUIDE.md
+│   └── PERFORMANCE.md
+├── tests/                   # Backend tests (17/17 passing)
+│   ├── conftest.py
+│   └── test_expiration.py
+├── frontend/                # Frontend (React)
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Layout/      # Header, Footer, Layout
+│   │   │   ├── Landing/     # Hero, Features, etc
+│   │   │   └── UI/          # Button (reusable)
+│   │   ├── styles/
+│   │   │   └── globals.css
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   ├── package.json
+│   ├── tailwind.config.js
+│   └── vite.config.ts
+├── requirements.txt
+├── Dockerfile
+├── docker-compose.yml
+└── README.md
 ```
 
 ## 🚀 Next Steps
