@@ -73,9 +73,11 @@ A production-grade URL shortening service with advanced analytics, geolocation t
 
 ## 🛠️ Tech Stack
 
+### Backend
+
 | Component | Technology | Notes |
 |-----------|-----------|-------|
-| **Backend** | FastAPI 0.104.1 | Async Python framework |
+| **Framework** | FastAPI 0.104.1 | Async Python framework |
 | **Database** | PostgreSQL 15 | Cloud SQL on GCP |
 | **ORM** | SQLAlchemy 1.4.46 | Database abstraction layer |
 | **Cache** | Redis 7 | Memorystore on GCP |
@@ -83,7 +85,17 @@ A production-grade URL shortening service with advanced analytics, geolocation t
 | **Rate Limiting** | slowapi | Per-endpoint and per-user limits |
 | **API Server** | Uvicorn 0.24.0 | ASGI server |
 | **Deployment** | GCP Cloud Run | Serverless container platform |
-| **Authentication** | Bearer Tokens | API key-based auth |
+
+### Frontend
+
+| Component | Technology | Notes |
+|-----------|-----------|-------|
+| **Framework** | React 18.2 | JavaScript UI library |
+| **Language** | TypeScript 5.3 | Type-safe development |
+| **Build Tool** | Vite 5.0 | Next-gen frontend tooling |
+| **Styling** | Tailwind CSS 3.3.6 | Utility-first CSS |
+| **Icons** | Lucide React | Modern icon library |
+| **Deployment** | GCP Cloud Run | Containerized static + API |
 
 ## 📋 Requirements
 
