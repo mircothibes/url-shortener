@@ -20,6 +20,30 @@ A production-grade URL shortening service with advanced analytics, geolocation t
 - 🚀 **Service URL**: https://url-shortener-1000156659602.us-central1.run.app
 - 📊 **Code**: ~2500 lines of production code
 
+## 📊 Development Journey
+
+### Phase 1: Backend Foundation (Days 1-60)
+- Core URL shortening + redirects
+- PostgreSQL schema design
+- API key authentication
+- Basic analytics
+
+### Phase 2: Advanced Backend (Days 61-180)
+- 4 link expiration policies
+- QR code generation
+- Batch operations
+- Webhook system
+- Database optimization (7 indexes)
+- Redis caching (100x faster)
+- Automated testing (17 tests)
+- GCP Cloud Run deployment
+
+### Phase 3: Frontend Initialization (Days 181-184)
+- **Day 181**: React 18 + TypeScript + Tailwind setup
+- **Day 182**: Global styles + Button component
+- **Day 183**: Landing page (Hero, Features, HowItWorks, Pricing)
+- **Day 184**: README update (this file)
+
 ## 🎯 Features
 
 ### Core Functionality
