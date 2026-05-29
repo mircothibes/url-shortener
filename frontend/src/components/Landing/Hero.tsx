@@ -21,6 +21,7 @@
 import React from 'react'
 import { Button } from '../UI/Button'
 import { ArrowRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 /**
  * Hero Component
@@ -34,6 +35,7 @@ import { ArrowRight } from 'lucide-react'
  * @returns {React.ReactElement} Hero section element
  */
 export const Hero: React.FC = () => {
+  const navigate = useNavigate()  
   return (
     /**
      * Hero section container with gradient background
@@ -65,7 +67,7 @@ export const Hero: React.FC = () => {
             <Button 
               size="lg" 
               className="flex items-center justify-center gap-2"
-              onClick={() => console.log('Get started clicked')}
+              onClick={() => navigate('/register')}
             >
               Get Started
               <ArrowRight className="w-5 h-5" />

@@ -19,6 +19,7 @@
 
 import React from 'react'
 import { Link } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 /**
  * Header Component
@@ -31,6 +32,7 @@ import { Link } from 'lucide-react'
  * @returns {React.ReactElement} Header element with navigation
  */
 export const Header: React.FC = () => {
+  const navigate = useNavigate()
   return (
     /**
      * Header container with sticky positioning and shadow
@@ -72,13 +74,15 @@ export const Header: React.FC = () => {
           
           {/* Authentication buttons - login and sign up */}
           <div className="flex gap-3">
-            <button 
+            <button
+              onClick={() => navigate('/login')}  
               className="text-slate-600 hover:text-slate-800 font-medium transition"
               aria-label="Login to your account"
             >
               Login
             </button>
-            <button 
+            <button
+              onClick={() => navigate('/register')}  
               className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
               aria-label="Sign up for a new account"
             >
