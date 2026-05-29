@@ -1,14 +1,15 @@
 /**
  * App Component
  * 
- * Root component of the entire application.
- * Integrates the Layout wrapper with the LandingPage component.
+ * Root application component with routing configuration.
+ * Sets up React Router with all application routes.
+ * Wraps app with AuthProvider for global authentication.
  * 
- * This is the main entry point that gets rendered in index.html.
- * 
- * Structure:
- * - Layout (Header + Footer wrapper)
- *   - LandingPage (all sections)
+ * Routes:
+ * - / — Landing page (public)
+ * - /login — Login page (public)
+ * - /register — Register page (public)
+ * - /dashboard — Dashboard (protected)
  * 
  * Props: None
  * 
@@ -16,27 +17,84 @@
  * This component is automatically rendered by main.tsx
  */
 
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider } from './contexts/AuthContext'
+import { ProtectedRoute } from './components/ProtectedRoute'
 import { Layout } from './components/Layout/Layout'
 import { LandingPage } from './components/Landing/LandingPage'
+import { Login } from './pages/auth/Login'
+import { Register } from './pages/auth/Register'
 import './styles/globals.css'
+
+/**
+ * Placeholder Dashboard Component
+ * TODO: Create proper dashboard page
+ */
+const Dashboard = () => (
+  <div className="p-8">
+    <h1 className="text-3xl font-bold">Dashboard</h1>
+    <p className="text-slate-600 mt-4">Welcome to your dashboard! 🎉</p>
+  </div>
+)
 
 /**
  * App Component
  * 
- * Main application component that renders:
- * - Layout wrapper with Header and Footer
- * - LandingPage content in the middle
+ * Main application component with routing setup.
+ * Provides authentication context to entire app.
+ * Configures all public and protected routes.
  * 
- * The Layout component ensures consistent structure across all pages:
- * Header (sticky) → Main Content → Footer (sticky to bottom)
- * 
- * @returns {React.ReactElement} Complete app with layout and landing page
+ * @returns {React.ReactElement} Complete app with routing
  */
 function App() {
   return (
-    <Layout>
-      <LandingPage />
-    </Layout>
+    /**
+     * Wrap entire app with React Router
+     */
+    <Router>
+      {/* Wrap with authentication provider */}
+      <AuthProvider>
+        {/* Route configuration */}
+        <Routes>
+          {/* Landing page route (public) */}
+          <Route
+            path="/"
+            element={
+              <Layout>
+                <LandingPage />
+              </Layout>
+            }
+          />
+
+          {/* Login page route (public) */}
+          <Route
+            path="/login"
+            element={<Login />}
+          />
+
+          {/* Register page route (public) */}
+          <Route
+            path="/register"
+            element={<Register />}
+          />
+
+          {/* Dashboard route (protected) */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Dashboard />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Catch-all - redirect to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
+    </Router>
   )
 }
 
