@@ -3,13 +3,16 @@
  * 
  * Global authentication context for the application.
  * Manages user login state, authentication token, and logout functionality.
- * Provides authentication state to entire app through React Context API.
+ * Uses mock authentication (simulates API responses without backend).
  * 
- * Features:
- * - User login/logout management
- * - Token storage (localStorage)
+ * Mock Features:
+ * - Simulated login with email/password
+ * - Simulated registration
+ * - Token storage in localStorage
  * - Automatic token restoration on app load
  * - Loading state during auth operations
+ * 
+ * TODO: Replace mock responses with real API calls once backend auth is ready
  * 
  * Usage:
  * <AuthProvider>
@@ -104,11 +107,38 @@ interface AuthProviderProps {
 }
 
 /**
+ * Mock user database (simulates backend storage)
+ * In production, this would be replaced with real API calls
+ */
+const mockUserDatabase: { [email: string]: { password: string; user: User } } = {
+  'demo@example.com': {
+    password: 'demo123',
+    user: {
+      id: '1',
+      email: 'demo@example.com',
+      name: 'Demo User',
+    },
+  },
+}
+
+/**
+ * Generate mock JWT token (simulates backend token generation)
+ * In production, backend would generate real JWT tokens
+ */
+const generateMockToken = (email: string): string => {
+  return `mock_token_${email}_${Date.now()}`
+}
+
+/**
  * AuthProvider Component
  * 
  * Provides authentication context to entire application.
- * Manages login, register, logout operations.
+ * Manages login, register, logout operations with mock data.
  * Restores token from localStorage on mount.
+ * 
+ * Mock Credentials for Testing:
+ * - Email: demo@example.com
+ * - Password: demo123
  * 
  * @param {AuthProviderProps} props - Provider props
  * @returns {React.ReactElement} Provider wrapper
@@ -128,57 +158,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    * Loading state for async operations
    */
   const [loading, setLoading] = useState(false)
-  
-  /**
-   * API base URL from backend
-   * Change this to match your backend URL
-   */
-  const API_URL = 'https://url-shortener-1000156659602.us-central1.run.app'
 
   /**
    * Restore authentication on app load
    * Checks localStorage for existing token
-   * Validates token by calling backend
    */
   useEffect(() => {
     const restoreAuth = async () => {
       const storedToken = localStorage.getItem('auth_token')
+      const storedUser = localStorage.getItem('user_data')
       
-      if (storedToken) {
+      if (storedToken && storedUser) {
         setLoading(true)
         try {
           /**
-           * Validate token by calling health endpoint
-           * (Replace with actual endpoint when ready)
+           * Simulate API delay
            */
-          const response = await fetch(`${API_URL}/health`)
-          if (response.ok) {
-            setToken(storedToken)
-            /**
-             * TODO: Fetch user data from backend
-             * For now, we'll set placeholder user
-             */
-            const userEmail = localStorage.getItem('user_email') || ''
-            const userName = localStorage.getItem('user_name') || ''
-            
-            if (userEmail) {
-              setUser({
-                id: '1',
-                email: userEmail,
-                name: userName,
-              })
-            }
-          } else {
-            /**
-             * Token invalid - clear storage
-             */
-            localStorage.removeItem('auth_token')
-            localStorage.removeItem('user_email')
-            localStorage.removeItem('user_name')
-          }
+          await new Promise(resolve => setTimeout(resolve, 500))
+          
+          /**
+           * Restore user and token
+           */
+          const userData: User = JSON.parse(storedUser)
+          setToken(storedToken)
+          setUser(userData)
         } catch (error) {
           console.error('Auth restoration failed:', error)
           localStorage.removeItem('auth_token')
+          localStorage.removeItem('user_data')
         } finally {
           setLoading(false)
         }
@@ -189,85 +196,110 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [])
 
   /**
-   * Login user with email and password
+   * Mock login function
+   * Simulates backend authentication without real API
    * 
    * @param {string} email - User email
    * @param {string} password - User password
-   * @throws Error if login fails
+   * @throws Error if credentials are invalid
    */
   const login = async (email: string, password: string) => {
     setLoading(true)
     try {
       /**
-       * Call backend login endpoint
-       * TODO: Create /api/v1/auth/login endpoint in backend
+       * Simulate network delay
        */
-      const response = await fetch(`${API_URL}/api/v1/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Login failed')
-      }
-
-      const data = await response.json()
-      const { token: newToken, user: userData } = data
+      await new Promise(resolve => setTimeout(resolve, 800))
 
       /**
-       * Store token and user data
+       * Check mock database for user
        */
+      const mockUser = mockUserDatabase[email]
+      
+      if (!mockUser) {
+        throw new Error('User not found')
+      }
+
+      /**
+       * Validate password
+       */
+      if (mockUser.password !== password) {
+        throw new Error('Invalid password')
+      }
+
+      /**
+       * Generate mock token and set user
+       */
+      const newToken = generateMockToken(email)
+      const userData = mockUser.user
+
       setToken(newToken)
       setUser(userData)
+      
+      /**
+       * Persist to localStorage
+       */
       localStorage.setItem('auth_token', newToken)
-      localStorage.setItem('user_email', userData.email)
-      localStorage.setItem('user_name', userData.name)
+      localStorage.setItem('user_data', JSON.stringify(userData))
     } finally {
       setLoading(false)
     }
   }
 
   /**
-   * Register new user
+   * Mock register function
+   * Simulates backend registration without real API
    * 
    * @param {string} email - User email
    * @param {string} password - User password
    * @param {string} name - User full name
-   * @throws Error if registration fails
+   * @throws Error if email already exists
    */
   const register = async (email: string, password: string, name: string) => {
     setLoading(true)
     try {
       /**
-       * Call backend register endpoint
-       * TODO: Create /api/v1/auth/register endpoint in backend
+       * Simulate network delay
        */
-      const response = await fetch(`${API_URL}/api/v1/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password, name }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Registration failed')
-      }
-
-      const data = await response.json()
-      const { token: newToken, user: userData } = data
+      await new Promise(resolve => setTimeout(resolve, 1000))
 
       /**
-       * Store token and user data
+       * Check if email already exists
        */
+      if (mockUserDatabase[email]) {
+        throw new Error('Email already registered')
+      }
+
+      /**
+       * Create new mock user
+       */
+      const newUser: User = {
+        id: Date.now().toString(),
+        email,
+        name,
+      }
+
+      /**
+       * Add to mock database
+       */
+      mockUserDatabase[email] = {
+        password,
+        user: newUser,
+      }
+
+      /**
+       * Generate mock token and set user
+       */
+      const newToken = generateMockToken(email)
+
       setToken(newToken)
-      setUser(userData)
+      setUser(newUser)
+      
+      /**
+       * Persist to localStorage
+       */
       localStorage.setItem('auth_token', newToken)
-      localStorage.setItem('user_email', userData.email)
-      localStorage.setItem('user_name', userData.name)
+      localStorage.setItem('user_data', JSON.stringify(newUser))
     } finally {
       setLoading(false)
     }
@@ -281,8 +313,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null)
     setToken(null)
     localStorage.removeItem('auth_token')
-    localStorage.removeItem('user_email')
-    localStorage.removeItem('user_name')
+    localStorage.removeItem('user_data')
   }
 
   /**
