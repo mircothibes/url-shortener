@@ -3,14 +3,20 @@
  * 
  * Global authentication context for the application.
  * Manages user login state, authentication token, and logout functionality.
- * Uses mock authentication (simulates API responses without backend).
+ * Uses mock authentication with localStorage persistence.
  * 
  * Mock Features:
  * - Simulated login with email/password
  * - Simulated registration
  * - Token storage in localStorage
+ * - User database persistence (survives page reload)
  * - Automatic token restoration on app load
  * - Loading state during auth operations
+ * 
+ * Persistence:
+ * - Users stored in localStorage under 'mock_user_database' key
+ * - Survives page reloads and browser closes
+ * - Can be cleared manually via browser dev tools
  * 
  * TODO: Replace mock responses with real API calls once backend auth is ready
  * 
@@ -107,10 +113,20 @@ interface AuthProviderProps {
 }
 
 /**
- * Mock user database (simulates backend storage)
- * In production, this would be replaced with real API calls
+ * Mock user database structure
  */
-const mockUserDatabase: { [email: string]: { password: string; user: User } } = {
+interface MockUserDatabase {
+  [email: string]: {
+    password: string
+    user: User
+  }
+}
+
+/**
+ * Initial mock user database
+ * Includes demo user for testing
+ */
+const initialMockDatabase: MockUserDatabase = {
   'demo@example.com': {
     password: 'demo123',
     user: {
@@ -119,6 +135,34 @@ const mockUserDatabase: { [email: string]: { password: string; user: User } } = 
       name: 'Demo User',
     },
   },
+}
+
+/**
+ * Load mock database from localStorage
+ * Falls back to initial database if not found
+ */
+const loadMockDatabase = (): MockUserDatabase => {
+  try {
+    const stored = localStorage.getItem('mock_user_database')
+    if (stored) {
+      return JSON.parse(stored)
+    }
+  } catch (error) {
+    console.error('Failed to load mock database from localStorage:', error)
+  }
+  return initialMockDatabase
+}
+
+/**
+ * Save mock database to localStorage
+ * Ensures persistence across page reloads
+ */
+const saveMockDatabase = (database: MockUserDatabase) => {
+  try {
+    localStorage.setItem('mock_user_database', JSON.stringify(database))
+  } catch (error) {
+    console.error('Failed to save mock database to localStorage:', error)
+  }
 }
 
 /**
@@ -133,12 +177,14 @@ const generateMockToken = (email: string): string => {
  * AuthProvider Component
  * 
  * Provides authentication context to entire application.
- * Manages login, register, logout operations with mock data.
+ * Manages login, register, logout operations with persistent mock data.
  * Restores token from localStorage on mount.
  * 
  * Mock Credentials for Testing:
  * - Email: demo@example.com
  * - Password: demo123
+ * 
+ * Additional users can be registered and will persist across page reloads.
  * 
  * @param {AuthProviderProps} props - Provider props
  * @returns {React.ReactElement} Provider wrapper
@@ -160,8 +206,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(false)
 
   /**
+   * Mock database reference
+   * Loaded from localStorage on mount
+   * Updated when new users register
+   */
+  const [mockDatabase, setMockDatabase] = useState<MockUserDatabase>(
+    loadMockDatabase()
+  )
+
+  /**
    * Restore authentication on app load
-   * Checks localStorage for existing token
+   * Checks localStorage for existing token and user data
+   * This runs once on component mount
    */
   useEffect(() => {
     const restoreAuth = async () => {
@@ -214,7 +270,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       /**
        * Check mock database for user
        */
-      const mockUser = mockUserDatabase[email]
+      const mockUser = mockDatabase[email]
       
       if (!mockUser) {
         throw new Error('User not found')
@@ -249,6 +305,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   /**
    * Mock register function
    * Simulates backend registration without real API
+   * Saves new user to mock database and persists to localStorage
    * 
    * @param {string} email - User email
    * @param {string} password - User password
@@ -266,7 +323,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       /**
        * Check if email already exists
        */
-      if (mockUserDatabase[email]) {
+      if (mockDatabase[email]) {
         throw new Error('Email already registered')
       }
 
@@ -282,10 +339,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       /**
        * Add to mock database
        */
-      mockUserDatabase[email] = {
-        password,
-        user: newUser,
+      const updatedDatabase = {
+        ...mockDatabase,
+        [email]: {
+          password,
+          user: newUser,
+        },
       }
+
+      /**
+       * Update state and persist to localStorage
+       */
+      setMockDatabase(updatedDatabase)
+      saveMockDatabase(updatedDatabase)
 
       /**
        * Generate mock token and set user
@@ -296,7 +362,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(newUser)
       
       /**
-       * Persist to localStorage
+       * Persist user session to localStorage
        */
       localStorage.setItem('auth_token', newToken)
       localStorage.setItem('user_data', JSON.stringify(newUser))
