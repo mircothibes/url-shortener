@@ -24,18 +24,8 @@ import { Layout } from './components/Layout/Layout'
 import { LandingPage } from './components/Landing/LandingPage'
 import { Login } from './pages/auth/Login'
 import { Register } from './pages/auth/Register'
+import { Dashboard } from './pages/dashboard/Dashboard'
 import './styles/globals.css'
-
-/**
- * Placeholder Dashboard Component
- * TODO: Create proper dashboard page
- */
-const Dashboard = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold">Dashboard</h1>
-    <p className="text-slate-600 mt-4">Welcome to your dashboard! 🎉</p>
-  </div>
-)
 
 /**
  * App Component
