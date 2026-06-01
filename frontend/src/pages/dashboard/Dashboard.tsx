@@ -25,6 +25,7 @@ import { StatsCard } from '../../components/Dashboard/StatsCard'
 import { URLsList } from '../../components/Dashboard/URLsList'
 import { QuickCreate } from '../../components/Dashboard/QuickCreate'
 import { useAuth } from '../../hooks/useAuth'
+import { useNavigate } from 'react-router-dom'
 
 /**
  * Interface for URL item in dashboard
@@ -114,9 +115,9 @@ export const Dashboard: React.FC = () => {
    * Handle view analytics
    * In production, would navigate to analytics page
    */
+  const navigate = useNavigate()
   const handleViewAnalytics = (id: string) => {
-    console.log('View analytics for URL:', id)
-    // TODO: Navigate to analytics page for this URL
+    navigate(`/analytics/${id}`)
   }
 
   /**
