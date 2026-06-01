@@ -25,6 +25,7 @@ import { LandingPage } from './components/Landing/LandingPage'
 import { Login } from './pages/auth/Login'
 import { Register } from './pages/auth/Register'
 import { Dashboard } from './pages/dashboard/Dashboard'
+import { Analytics } from './pages/analytics/Analytics'
 import './styles/globals.css'
 
 /**
@@ -79,6 +80,19 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Analytics route (protected) */}
+          <Route
+            path="/analytics/:urlId"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Analytics />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
 
           {/* Catch-all - redirect to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
