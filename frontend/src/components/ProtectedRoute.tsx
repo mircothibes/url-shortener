@@ -48,12 +48,11 @@ interface ProtectedRouteProps {
  * </ProtectedRoute>
  * ```
  */
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {       
   /**
    * Get authentication state from context
    */
-  const { isAuthenticated, loading } = useAuth()
-
+  const { isAuthenticated, loading } = useAuth()  
   /**
    * Show loading spinner while checking authentication
    */
