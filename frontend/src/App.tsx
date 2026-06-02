@@ -10,13 +10,14 @@
  * - /login — Login page (public)
  * - /register — Register page (public)
  * - /dashboard — Dashboard (protected)
+ * - /analytics/:urlId — Analytics (protected)
+ * - /urls — URL Management (protected)
  * 
  * Props: None
  * 
  * Usage:
  * This component is automatically rendered by main.tsx
  */
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
@@ -26,6 +27,7 @@ import { Login } from './pages/auth/Login'
 import { Register } from './pages/auth/Register'
 import { Dashboard } from './pages/dashboard/Dashboard'
 import { Analytics } from './pages/analytics/Analytics'
+import { URLManagement } from './pages/url-management/URLManagement'
 import './styles/globals.css'
 
 /**
@@ -39,13 +41,8 @@ import './styles/globals.css'
  */
 function App() {
   return (
-    /**
-     * Wrap entire app with React Router
-     */
     <Router>
-      {/* Wrap with authentication provider */}
       <AuthProvider>
-        {/* Route configuration */}
         <Routes>
           {/* Landing page route (public) */}
           <Route
@@ -93,6 +90,12 @@ function App() {
             }
           />
 
+          {/* URL Management route (protected) */}
+          <Route
+            path="/urls"
+            element={<URLManagement />}
+            
+          />
 
           {/* Catch-all - redirect to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
