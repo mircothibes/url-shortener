@@ -28,6 +28,7 @@ import { Register } from './pages/auth/Register'
 import { Dashboard } from './pages/dashboard/Dashboard'
 import { Analytics } from './pages/analytics/Analytics'
 import { URLManagement } from './pages/url-management/URLManagement'
+import { Settings } from './pages/settings/Settings'
 import './styles/globals.css'
 
 /**
@@ -95,6 +96,16 @@ function App() {
             path="/urls"
             element={<URLManagement />}
             
+          />
+
+          {/* Settings route (protected) */}
+          <Route
+            path="/settings"
+            element={
+              <Layout>
+                <Settings />
+              </Layout>
+            }
           />
 
           {/* Catch-all - redirect to home */}
