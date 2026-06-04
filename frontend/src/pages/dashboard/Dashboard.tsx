@@ -20,7 +20,7 @@
  */
 
 import React, { useState } from 'react'
-import { Link2, BarChart3, Eye, TrendingUp } from 'lucide-react'
+import { Link2, BarChart3, Eye, TrendingUp, Settings } from 'lucide-react'
 import { StatsCard } from '../../components/Dashboard/StatsCard'
 import { URLsList } from '../../components/Dashboard/URLsList'
 import { QuickCreate } from '../../components/Dashboard/QuickCreate'
@@ -133,14 +133,23 @@ export const Dashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Header section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">
-            Welcome back, {user?.name}! 👋
-          </h1>
-          <p className="text-slate-600 mt-2">
-            Here's what's happening with your URLs today
-          </p>
-        </div>
+        <div className="mb-8 flex items-center justify-between"> 
+         <div>
+           <h1 className="text-3xl font-bold text-slate-900">
+             Welcome back, {user?.name}! 👋
+           </h1>
+           <p className="text-slate-600 mt-2">
+             Here's what's happening with your URLs today
+           </p>
+         </div>
+         <button
+           onClick={() => navigate('/settings')}
+           className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition"
+         >
+           <Settings className="w-5 h-5" />
+           <span>Settings</span>
+         </button>
+        </div>  
 
         {/* Statistics grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
