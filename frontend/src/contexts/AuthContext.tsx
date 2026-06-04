@@ -12,6 +12,7 @@
  * - User database persistence (survives page reload)
  * - Automatic token restoration on app load
  * - Loading state during auth operations
+ * - Listen for storage changes when profile is updated
  * 
  * Persistence:
  * - Users stored in localStorage under 'mock_user_database' key
@@ -179,6 +180,7 @@ const generateMockToken = (email: string): string => {
  * Provides authentication context to entire application.
  * Manages login, register, logout operations with persistent mock data.
  * Restores token from localStorage on mount.
+ * Listens for storage changes to update user when profile is modified.
  * 
  * Mock Credentials for Testing:
  * - Email: demo@example.com
@@ -220,35 +222,48 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    * This runs once on component mount
    */
   useEffect(() => {
-    const restoreAuth = async () => {
-      const storedToken = localStorage.getItem('auth_token')
-      const storedUser = localStorage.getItem('user_data')
-      
-      if (storedToken && storedUser) {
-        setLoading(true)
-        try {
-          /**
-           * Simulate API delay
-           */
-          await new Promise(resolve => setTimeout(resolve, 500))
-          
-          /**
-           * Restore user and token
-           */
+    const storedToken = localStorage.getItem('auth_token')
+    const storedUser = localStorage.getItem('user_data')
+    
+    if (storedToken && storedUser) {
+      setLoading(true)
+      try {
+        /**
+         * Simulate API delay
+         */
+        setTimeout(() => {
           const userData: User = JSON.parse(storedUser)
           setToken(storedToken)
           setUser(userData)
-        } catch (error) {
-          console.error('Auth restoration failed:', error)
-          localStorage.removeItem('auth_token')
-          localStorage.removeItem('user_data')
-        } finally {
           setLoading(false)
+        }, 500)
+      } catch (error) {
+        console.error('Auth restoration failed:', error)
+        localStorage.removeItem('auth_token')
+        localStorage.removeItem('user_data')
+        setLoading(false)
+      }
+    }
+  }, [])
+
+  /**
+   * Listen for storage changes (when ProfileSettings updates user_data)
+   * This allows the user state to update when profile is modified in Settings
+   */
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'user_data' && e.newValue) {
+        try {
+          const updatedUser = JSON.parse(e.newValue)
+          setUser(updatedUser)
+        } catch (error) {
+          console.error('Failed to parse updated user data:', error)
         }
       }
     }
 
-    restoreAuth()
+    window.addEventListener('storage', handleStorageChange)
+    return () => window.removeEventListener('storage', handleStorageChange)
   }, [])
 
   /**
