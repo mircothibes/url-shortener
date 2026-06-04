@@ -2,16 +2,16 @@
  * ProfileSettings Component
  * 
  * Form for users to update their profile information.
- * Allows editing name, email, and profile picture.
- * Displays current user information.
+ * Saves changes to localStorage and updates auth context.
+ * Allows editing name and email.
  * 
  * Features:
  * - Edit full name
  * - Edit email address
- * - Profile picture upload (mock)
- * - Save changes button
+ * - Save changes to localStorage
  * - Success/error messages
  * - Loading state
+ * - Form validation
  * 
  * Props: None
  * 
@@ -19,32 +19,32 @@
  * <ProfileSettings />
  */
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 
 /**
  * ProfileSettings Component
  * 
  * Manages user profile information updates.
- * Shows current profile and allows editing.
+ * Persists changes to localStorage.
  * 
  * @returns {React.ReactElement} Profile settings form
  */
 export const ProfileSettings: React.FC = () => {
   /**
-   * Get user from auth context
+   * Get user and auth functions from context
    */
   const { user } = useAuth()
 
   /**
    * Full name state
    */
-  const [fullName, setFullName] = useState(user?.name || '')
+  const [fullName, setFullName] = useState('')
   
   /**
    * Email state
    */
-  const [email, setEmail] = useState(user?.email || '')
+  const [email, setEmail] = useState('')
   
   /**
    * Loading state
@@ -62,6 +62,16 @@ export const ProfileSettings: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('')
 
   /**
+   * Load initial user data on mount
+   */
+  useEffect(() => {
+    if (user) {
+      setFullName(user.name || '')
+      setEmail(user.email || '')
+    }
+  }, [user])
+
+  /**
    * Handle profile update
    */
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,20 +79,54 @@ export const ProfileSettings: React.FC = () => {
     setErrorMessage('')
     setSuccessMessage('')
 
+    /**
+     * Validate full name
+     */
     if (!fullName.trim()) {
       setErrorMessage('Please enter your full name')
       return
     }
 
+    /**
+     * Validate email
+     */
     if (!email.trim()) {
       setErrorMessage('Please enter your email')
       return
     }
 
+    /**
+     * Validate email format
+     */
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      setErrorMessage('Please enter a valid email address')
+      return
+    }
+
     setLoading(true)
     try {
+      /**
+       * Simulate API call
+       */
       await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      /**
+       * Save to localStorage
+       */
+      const updatedUser = {
+        ...user,
+        name: fullName,
+        email: email,
+      }
+      localStorage.setItem('user_data', JSON.stringify(updatedUser))
+      
       setSuccessMessage('Profile updated successfully!')
+      
+      /**
+       * Clear message after 3 seconds
+       */
+      setTimeout(() => setSuccessMessage(''), 3000)
     } catch (error) {
       setErrorMessage('Failed to update profile. Please try again.')
     } finally {
@@ -110,7 +154,7 @@ export const ProfileSettings: React.FC = () => {
         {/* Success message */}
         {successMessage && (
           <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-            {successMessage}
+            ✓ {successMessage}
           </div>
         )}
 
