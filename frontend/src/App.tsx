@@ -94,8 +94,13 @@ function App() {
           {/* URL Management route (protected) */}
           <Route
             path="/urls"
-            element={<URLManagement />}
-            
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <URLManagement />
+                </Layout>
+              </ProtectedRoute>  
+            }            
           />
 
           {/* Settings route (protected) */}
