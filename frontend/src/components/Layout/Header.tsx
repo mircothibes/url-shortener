@@ -37,12 +37,20 @@ export const Header: React.FC = () => {
    * Used to hide the Dashboard button when it would be redundant.
    */
   const isOnDashboard = location.pathname === '/dashboard'
+  
+  /**
+   * Routes that already provide their own "Back to Dashboard" link,
+   * so the Dashboard button in the header is hidden to avoid redundancy.
+   */
+  const hasBackToDashboard =
+    location.pathname.startsWith('/analytics') ||
+    location.pathname === '/settings'
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          
+                       
           {/* Logo */}
           <button
             onClick={handleLogoClick}
@@ -76,7 +84,7 @@ export const Header: React.FC = () => {
                 </button>
 
                 {/* Dashboard button - hidden when already on dashboard */}
-                {!isOnDashboard && (
+                {!isOnDashboard && !hasBackToDashboard && (
                   <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg font-medium">
                     <LayoutDashboard className="w-5 h-5" />
                     <span className="hidden sm:inline">Dashboard</span>
