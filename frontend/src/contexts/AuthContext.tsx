@@ -204,8 +204,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   
   /**
    * Loading state for async operations
+   * Starts as `true` if a token exists in localStorage, so ProtectedRoute
+   * waits for session restoration instead of redirecting prematurely.
    */
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(() =>{
+    return !!localStorage.getItem('auth_token')
+  })
 
   /**
    * Mock database reference
