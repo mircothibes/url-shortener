@@ -1,21 +1,21 @@
 /**
  * ChangePassword Component
- * 
+ *
  * Form for users to change their account password securely.
  * Validates old password and new password confirmation.
- * Saves new password to localStorage.
- * 
+ * Uses updatePassword from AuthContext to persist the change in the mock database.
+ *
  * Features:
- * - Old password verification
+ * - Old password verification (against mock database)
  * - New password input with strength indicator
  * - Confirm password validation
  * - Password requirements (min 8 chars)
  * - Success/error messages
  * - Form validation
  * - Loading state
- * 
+ *
  * Props: None
- * 
+ *
  * Usage:
  * <ChangePassword />
  */
@@ -25,44 +25,44 @@ import { useAuth } from '../../hooks/useAuth'
 
 /**
  * ChangePassword Component
- * 
+ *
  * Allows users to change their account password securely.
  * Validates both old and new passwords before submission.
- * Stores new password in localStorage.
- * 
+ * Persists the new password via AuthContext (mock database).
+ *
  * @returns {React.ReactElement} Password change form
  */
 export const ChangePassword: React.FC = () => {
   /**
-   * Get auth data from context
+   * Get auth data and password updater from context
    */
-  const { user } = useAuth()
+  const { updatePassword } = useAuth()
 
   /**
    * Old password state
    */
   const [oldPassword, setOldPassword] = useState('')
-  
+
   /**
    * New password state
    */
   const [newPassword, setNewPassword] = useState('')
-  
+
   /**
    * Confirm password state
    */
   const [confirmPassword, setConfirmPassword] = useState('')
-  
+
   /**
    * Loading state during submission
    */
   const [loading, setLoading] = useState(false)
-  
+
   /**
    * Success message state
    */
   const [successMessage, setSuccessMessage] = useState('')
-  
+
   /**
    * Error message state
    */
@@ -103,13 +103,7 @@ export const ChangePassword: React.FC = () => {
     setSuccessMessage('')
 
     /**
-     * Get stored user data from localStorage
-     */
-    const storedUserData = localStorage.getItem('user_data')
-    const userData = storedUserData ? JSON.parse(storedUserData) : null
-
-    /**
-     * Validate old password (mock comparison)
+     * Validate old password presence
      */
     if (!oldPassword) {
       setErrorMessage('Please enter your current password')
@@ -117,16 +111,7 @@ export const ChangePassword: React.FC = () => {
     }
 
     /**
-     * Mock password verification
-     * In real app, would be verified on backend
-     */
-    if (oldPassword !== 'demo123') {
-      setErrorMessage('Current password is incorrect')
-      return
-    }
-
-    /**
-     * Validate new password
+     * Validate new password presence
      */
     if (!newPassword) {
       setErrorMessage('Please enter your new password')
@@ -150,7 +135,7 @@ export const ChangePassword: React.FC = () => {
     }
 
     /**
-     * Validate password is different from old
+     * Validate new password is different from old
      */
     if (newPassword === oldPassword) {
       setErrorMessage('New password must be different from current password')
@@ -160,31 +145,30 @@ export const ChangePassword: React.FC = () => {
     setLoading(true)
     try {
       /**
-       * Simulate API call
+       * Update password via AuthContext.
+       * This validates the current password against the mock database
+       * and stores the new one, so it works on the next login.
        */
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      /**
-       * Save new password (mock - in real app would hash on backend)
-       */
-      const passwordData = {
-        oldPassword: oldPassword,
-        newPassword: newPassword,
-        changedAt: new Date().toISOString(),
-      }
-      localStorage.setItem('password_data', JSON.stringify(passwordData))
-      
+      await updatePassword(oldPassword, newPassword)
+
       setSuccessMessage('Password changed successfully!')
       setOldPassword('')
       setNewPassword('')
       setConfirmPassword('')
-      
+
       /**
        * Clear message after 3 seconds
        */
       setTimeout(() => setSuccessMessage(''), 3000)
     } catch (error) {
-      setErrorMessage('Failed to change password. Please try again.')
+      /**
+       * Show the error coming from updatePassword (e.g. wrong current password)
+       */
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to change password. Please try again.'
+      setErrorMessage(message)
     } finally {
       setLoading(false)
     }
@@ -201,7 +185,7 @@ export const ChangePassword: React.FC = () => {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        
+
         {/* Error message */}
         {errorMessage && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
@@ -245,7 +229,7 @@ export const ChangePassword: React.FC = () => {
             placeholder="Enter your new password"
             className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          
+
           {/* Password strength indicator */}
           {newPassword && (
             <div className="mt-2">
@@ -260,7 +244,7 @@ export const ChangePassword: React.FC = () => {
               </div>
             </div>
           )}
-          
+
           <p className="text-xs text-slate-500 mt-1">
             At least 8 characters
           </p>
