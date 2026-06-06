@@ -34,7 +34,7 @@ export const ProfileSettings: React.FC = () => {
   /**
    * Get user and auth functions from context
    */
-  const { user } = useAuth()
+  const { user, updateUser } = useAuth()
 
   /**
    * Full name state
@@ -112,15 +112,15 @@ export const ProfileSettings: React.FC = () => {
       await new Promise(resolve => setTimeout(resolve, 1000))
       
       /**
-       * Save to localStorage
+       * Update profile via AuthContext.
+       * This updates React state, the session, and the mock database,
+       * so the change persists across logout/login.
        */
-      const updatedUser = {
-        ...user,
+      updateUser({
         name: fullName,
         email: email,
-      }
-      localStorage.setItem('user_data', JSON.stringify(updatedUser))
-      
+      })
+
       setSuccessMessage('Profile updated successfully!')
       
       /**
