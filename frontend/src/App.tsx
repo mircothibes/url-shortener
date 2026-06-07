@@ -20,6 +20,7 @@
  */
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import { ThemeProvider } from './contexts/ThemeContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { Layout } from './components/Layout/Layout'
 import { LandingPage } from './components/Landing/LandingPage'
@@ -43,8 +44,9 @@ import './styles/globals.css'
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <Routes>
+      <ThemeProvider>
+        <AuthProvider>
+          <Routes>
           {/* Landing page route (public) */}
           <Route
             path="/"
@@ -115,8 +117,9 @@ function App() {
 
           {/* Catch-all - redirect to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AuthProvider>
+          </Routes>
+        </AuthProvider>
+      </ThemeProvider>
     </Router>
   )
 }
