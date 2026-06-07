@@ -51,6 +51,14 @@ body {
   color: #1e293b;
   line-height: 1.5;
 }
+/**
+ * Dark mode overrides for the body.
+ * Applied when the <html> element has the `dark` class (set by ThemeContext).
+ */
+.dark body {
+  background-color: #0f172a; /* slate-900 */
+  color: #e2e8f0;            /* slate-200 */
+}
 
 /**
  * Link styles
