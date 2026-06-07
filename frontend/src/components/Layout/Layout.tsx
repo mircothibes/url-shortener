@@ -57,7 +57,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
      * - flex flex-col: Creates vertical flex layout
      * Allows footer to stick to bottom when content is short
      */
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-slate-900 transition-colors">
       {/* Header component - always visible at top */}
       <Header />
       
