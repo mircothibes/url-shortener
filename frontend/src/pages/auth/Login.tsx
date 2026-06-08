@@ -1,18 +1,20 @@
 /**
  * Login Page
- * 
+ *
  * User authentication page for signing in with email and password.
  * Displays a form with email and password inputs.
  * Validates input before submission.
  * Redirects to dashboard on successful login.
- * 
+ * Supports dark mode.
+ *
  * Features:
  * - Email and password inputs
  * - Form validation
  * - Loading state during login
  * - Error message display
  * - Link to register page
- * 
+ * - Dark mode support
+ *
  * Usage:
  * <Login />
  */
@@ -24,11 +26,11 @@ import { useAuth } from '../../hooks/useAuth'
 
 /**
  * Login Component
- * 
+ *
  * Renders login form with email and password fields.
  * Handles form submission and redirects to dashboard on success.
  * Displays error messages if login fails.
- * 
+ *
  * @returns {React.ReactElement} Login form page
  */
 export const Login: React.FC = () => {
@@ -36,22 +38,22 @@ export const Login: React.FC = () => {
    * Form state - email input
    */
   const [email, setEmail] = useState('')
-  
+
   /**
    * Form state - password input
    */
   const [password, setPassword] = useState('')
-  
+
   /**
    * Error message to display
    */
   const [error, setError] = useState('')
-  
+
   /**
    * Get auth context for login function
    */
   const { login, loading } = useAuth()
-  
+
   /**
    * Router navigation hook
    */
@@ -96,7 +98,7 @@ export const Login: React.FC = () => {
        * Call login function from auth context
        */
       await login(email, password)
-      
+
       /**
        * Redirect to dashboard on success
        */
@@ -111,23 +113,23 @@ export const Login: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
-      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-        
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center px-4 transition-colors">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8 w-full max-w-md transition-colors">
+
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
             Welcome Back
           </h1>
-          <p className="text-slate-600">
+          <p className="text-slate-600 dark:text-slate-400">
             Sign in to your account to continue
           </p>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-600 text-sm">
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
+            <p className="text-red-600 dark:text-red-400 text-sm">
               {error}
             </p>
           </div>
@@ -135,10 +137,10 @@ export const Login: React.FC = () => {
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          
+
           {/* Email Input */}
           <div>
-            <label className="block text-slate-700 font-medium mb-2">
+            <label className="block text-slate-700 dark:text-slate-300 font-medium mb-2">
               Email
             </label>
             <input
@@ -146,14 +148,14 @@ export const Login: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="your@email.com"
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               disabled={loading}
             />
           </div>
 
           {/* Password Input */}
           <div>
-            <label className="block text-slate-700 font-medium mb-2">
+            <label className="block text-slate-700 dark:text-slate-300 font-medium mb-2">
               Password
             </label>
             <input
@@ -161,7 +163,7 @@ export const Login: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               disabled={loading}
             />
           </div>
@@ -170,7 +172,7 @@ export const Login: React.FC = () => {
           <div className="text-right">
             <Link
               to="/forgot-password"
-              className="text-sm text-blue-600 hover:text-blue-700"
+              className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
             >
               Forgot password?
             </Link>
@@ -188,12 +190,12 @@ export const Login: React.FC = () => {
         </form>
 
         {/* Divider */}
-        <div className="my-6 border-t border-slate-300"></div>
+        <div className="my-6 border-t border-slate-300 dark:border-slate-600"></div>
 
         {/* Sign Up Link */}
-        <p className="text-center text-slate-600">
+        <p className="text-center text-slate-600 dark:text-slate-400">
           Don't have an account?{' '}
-          <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">
+          <Link to="/register" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
             Sign up
           </Link>
         </p>
