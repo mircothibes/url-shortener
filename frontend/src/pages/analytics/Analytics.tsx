@@ -1,10 +1,11 @@
 /**
  * Analytics Page
- * 
+ *
  * Complete analytics dashboard for a shortened URL.
  * Shows detailed statistics with multiple charts.
  * Displays clicks over time, country breakdown, device distribution.
- * 
+ * Supports dark mode.
+ *
  * Features:
  * - Line chart for click trends
  * - Pie chart for countries
@@ -12,9 +13,10 @@
  * - Summary statistics
  * - Responsive grid layout
  * - Back button to dashboard
- * 
+ * - Dark mode support
+ *
  * Props: None (uses URL params to get URL ID)
- * 
+ *
  * Usage:
  * <Analytics />
  */
@@ -64,10 +66,10 @@ const mockAnalyticsData = {
 
 /**
  * Analytics Component
- * 
+ *
  * Main analytics page showing comprehensive statistics for a URL.
  * Displays multiple charts and summary information.
- * 
+ *
  * @returns {React.ReactElement} Analytics page
  */
 export const Analytics: React.FC = () => {
@@ -84,14 +86,14 @@ export const Analytics: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors">
       {/* Page content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
+
         {/* Back button */}
         <button
           onClick={handleBack}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6 transition"
+          className="flex items-center gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 mb-6 transition"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Dashboard</span>
@@ -99,39 +101,39 @@ export const Analytics: React.FC = () => {
 
         {/* Header section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
             Analytics: {mockAnalyticsData.shortCode}
           </h1>
-          <p className="text-slate-600">
+          <p className="text-slate-600 dark:text-slate-400">
             {mockAnalyticsData.originalUrl}
           </p>
         </div>
 
         {/* Summary statistics */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          
+
           {/* Total clicks card */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-slate-600 text-sm font-medium mb-2">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6 transition-colors">
+            <h3 className="text-slate-600 dark:text-slate-400 text-sm font-medium mb-2">
               Total Clicks
             </h3>
-            <p className="text-4xl font-bold text-slate-900">
+            <p className="text-4xl font-bold text-slate-900 dark:text-slate-100">
               {mockAnalyticsData.totalClicks}
             </p>
-            <p className="text-sm text-green-600 mt-2">
+            <p className="text-sm text-green-600 dark:text-green-400 mt-2">
               ↑ 12.5% from last week
             </p>
           </div>
 
           {/* Unique visitors card */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-slate-600 text-sm font-medium mb-2">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6 transition-colors">
+            <h3 className="text-slate-600 dark:text-slate-400 text-sm font-medium mb-2">
               Unique Visitors
             </h3>
-            <p className="text-4xl font-bold text-slate-900">
+            <p className="text-4xl font-bold text-slate-900 dark:text-slate-100">
               {mockAnalyticsData.uniqueVisitors}
             </p>
-            <p className="text-sm text-green-600 mt-2">
+            <p className="text-sm text-green-600 dark:text-green-400 mt-2">
               ↑ 8.2% from last week
             </p>
           </div>
@@ -139,7 +141,7 @@ export const Analytics: React.FC = () => {
 
         {/* Charts grid */}
         <div className="space-y-6 mb-8">
-          
+
           {/* Clicks over time chart */}
           <ClicksChart
             data={mockAnalyticsData.clicksData}
@@ -148,7 +150,7 @@ export const Analytics: React.FC = () => {
 
           {/* Country and device charts side by side */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
+
             {/* Countries chart */}
             <CountriesChart
               data={mockAnalyticsData.countriesData}
@@ -164,11 +166,11 @@ export const Analytics: React.FC = () => {
         </div>
 
         {/* Additional info section */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="font-semibold text-blue-900 mb-4">
+        <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-6 transition-colors">
+          <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-4">
             📊 About This Analytics
           </h3>
-          <ul className="text-sm text-blue-800 space-y-2">
+          <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-2">
             <li>✓ Data is updated in real-time</li>
             <li>✓ Geolocation determined from user IP address</li>
             <li>✓ Device type detected from User-Agent</li>
