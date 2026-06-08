@@ -48,6 +48,12 @@ interface User {
    * User's display name
    */
   name: string
+
+  /**
+   * User's profile picture as a base64 data URL (optional).
+   * Stored locally until a real backend/file storage is available.
+   */
+  avatar?: string
 }
 
 /**
