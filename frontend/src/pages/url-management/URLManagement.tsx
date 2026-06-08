@@ -1,10 +1,11 @@
 /**
  * URLManagement Page
- * 
+ *
  * Complete URL management interface for users.
  * Display all user URLs with search, filter, and management options.
  * Allows editing, deleting, copying, and viewing analytics for each URL.
- * 
+ * Supports dark mode.
+ *
  * Features:
  * - Search URLs by short code or original URL
  * - Sort by date or clicks
@@ -15,9 +16,10 @@
  * - Edit URL details
  * - Grid and list view options
  * - Empty state message
- * 
+ * - Dark mode support
+ *
  * Props: None (uses hooks)
- * 
+ *
  * Usage:
  * <URLManagement />
  */
@@ -37,27 +39,27 @@ interface URLData {
    * Unique URL identifier
    */
   id: string
-  
+
   /**
    * Generated short code
    */
   shortCode: string
-  
+
   /**
    * Original long URL
    */
   originalUrl: string
-  
+
   /**
    * Total clicks on this URL
    */
   clicks: number
-  
+
   /**
    * Creation date as formatted string
    */
   createdAt: string
-  
+
   /**
    * URL status (active or inactive)
    */
@@ -112,10 +114,10 @@ const mockURLs: URLData[] = [
 
 /**
  * URLManagement Component
- * 
+ *
  * Main page for managing shortened URLs.
  * Displays all user URLs with search and management features.
- * 
+ *
  * @returns {React.ReactElement} URL management page
  */
 export const URLManagement: React.FC = () => {
@@ -123,7 +125,7 @@ export const URLManagement: React.FC = () => {
    * Router navigation hook
    */
   const navigate = useNavigate()
-  
+
   /**
    * Auth context hook
    */
@@ -133,17 +135,17 @@ export const URLManagement: React.FC = () => {
    * Search term state
    */
   const [searchTerm, setSearchTerm] = useState('')
-  
+
   /**
    * Sort option state
    */
   const [sortBy, setSortBy] = useState('newest')
-  
+
   /**
    * Filter status state
    */
   const [filterStatus, setFilterStatus] = useState('all')
-  
+
   /**
    * URLs state (mock data)
    */
@@ -224,14 +226,14 @@ export const URLManagement: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors">
       {/* Page content */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
+
         {/* Back button */}
         <button
           onClick={handleBack}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6 transition"
+          className="flex items-center gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 mb-6 transition"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Dashboard</span>
@@ -239,10 +241,10 @@ export const URLManagement: React.FC = () => {
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
             URL Management
           </h1>
-          <p className="text-slate-600">
+          <p className="text-slate-600 dark:text-slate-400">
             Manage all your shortened URLs in one place
           </p>
         </div>
@@ -259,9 +261,9 @@ export const URLManagement: React.FC = () => {
 
         {/* Results summary */}
         <div className="mb-4">
-          <p className="text-sm text-slate-600">
-            Showing <span className="font-semibold">{filteredURLs.length}</span> of{' '}
-            <span className="font-semibold">{urls.length}</span> URLs
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            Showing <span className="font-semibold dark:text-slate-200">{filteredURLs.length}</span> of{' '}
+            <span className="font-semibold dark:text-slate-200">{urls.length}</span> URLs
           </p>
         </div>
 
@@ -288,10 +290,10 @@ export const URLManagement: React.FC = () => {
            */
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔍</div>
-            <h2 className="text-2xl font-semibold text-slate-900 mb-2">
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
               No URLs found
             </h2>
-            <p className="text-slate-600 mb-6">
+            <p className="text-slate-600 dark:text-slate-400 mb-6">
               {searchTerm || filterStatus !== 'all'
                 ? 'Try adjusting your search or filters'
                 : 'Create your first shortened URL in the Dashboard'}
