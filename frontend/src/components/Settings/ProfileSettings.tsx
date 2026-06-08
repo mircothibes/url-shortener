@@ -1,33 +1,42 @@
 /**
  * ProfileSettings Component
- * 
+ *
  * Form for users to update their profile information.
- * Saves changes to localStorage and updates auth context.
- * Allows editing name and email.
- * 
+ * Saves changes via AuthContext (persists to mock database).
+ * Allows editing name, email, and uploading a profile picture (stored as base64).
+ * Supports dark mode.
+ *
  * Features:
  * - Edit full name
  * - Edit email address
- * - Save changes to localStorage
+ * - Upload profile picture (local, base64, persisted in browser)
+ * - Persist changes via updateUser
  * - Success/error messages
  * - Loading state
  * - Form validation
- * 
+ * - Dark mode support
+ *
  * Props: None
- * 
+ *
  * Usage:
  * <ProfileSettings />
  */
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 
 /**
+ * Maximum allowed image size in bytes (2 MB).
+ * Larger images risk exceeding localStorage limits.
+ */
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024
+
+/**
  * ProfileSettings Component
- * 
+ *
  * Manages user profile information updates.
- * Persists changes to localStorage.
- * 
+ * Persists changes via AuthContext.
+ *
  * @returns {React.ReactElement} Profile settings form
  */
 export const ProfileSettings: React.FC = () => {
@@ -40,26 +49,36 @@ export const ProfileSettings: React.FC = () => {
    * Full name state
    */
   const [fullName, setFullName] = useState('')
-  
+
   /**
    * Email state
    */
   const [email, setEmail] = useState('')
-  
+
+  /**
+   * Avatar state (base64 data URL or empty)
+   */
+  const [avatar, setAvatar] = useState('')
+
   /**
    * Loading state
    */
   const [loading, setLoading] = useState(false)
-  
+
   /**
    * Success message
    */
   const [successMessage, setSuccessMessage] = useState('')
-  
+
   /**
    * Error message
    */
   const [errorMessage, setErrorMessage] = useState('')
+
+  /**
+   * Hidden file input reference, triggered by the "Upload new picture" button
+   */
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   /**
    * Load initial user data on mount
@@ -68,8 +87,53 @@ export const ProfileSettings: React.FC = () => {
     if (user) {
       setFullName(user.name || '')
       setEmail(user.email || '')
+      setAvatar(user.avatar || '')
     }
   }, [user])
+
+  /**
+   * Open the file picker when "Upload new picture" is clicked
+   */
+  const handleUploadClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  /**
+   * Handle file selection: validate, read as base64, and set as avatar preview.
+   */
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setErrorMessage('')
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    /**
+     * Validate file type
+     */
+    if (!file.type.startsWith('image/')) {
+      setErrorMessage('Please select an image file')
+      return
+    }
+
+    /**
+     * Validate file size
+     */
+    if (file.size > MAX_IMAGE_SIZE) {
+      setErrorMessage('Image must be smaller than 2MB')
+      return
+    }
+
+    /**
+     * Read the file as a base64 data URL for preview and storage
+     */
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setAvatar(reader.result as string)
+    }
+    reader.onerror = () => {
+      setErrorMessage('Failed to read image. Please try another file.')
+    }
+    reader.readAsDataURL(file)
+  }
 
   /**
    * Handle profile update
@@ -109,8 +173,8 @@ export const ProfileSettings: React.FC = () => {
       /**
        * Simulate API call
        */
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
       /**
        * Update profile via AuthContext.
        * This updates React state, the session, and the mock database,
@@ -119,10 +183,11 @@ export const ProfileSettings: React.FC = () => {
       updateUser({
         name: fullName,
         email: email,
+        avatar: avatar,
       })
 
       setSuccessMessage('Profile updated successfully!')
-      
+
       /**
        * Clear message after 3 seconds
        */
@@ -135,48 +200,65 @@ export const ProfileSettings: React.FC = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6 transition-colors">
       {/* Section title */}
-      <h3 className="text-lg font-semibold text-slate-900 mb-6">
+      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-6">
         Profile Information
       </h3>
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        
+
         {/* Error message */}
         {errorMessage && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded">
             {errorMessage}
           </div>
         )}
 
         {/* Success message */}
         {successMessage && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+          <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded">
             ✓ {successMessage}
           </div>
         )}
 
         {/* Profile picture section */}
-        <div className="flex items-center gap-4 pb-4 border-b border-slate-200">
-          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-            <span className="text-2xl">👤</span>
+        <div className="flex items-center gap-4 pb-4 border-b border-slate-200 dark:border-slate-700">
+          <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center overflow-hidden">
+            {avatar ? (
+              <img
+                src={avatar}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-2xl">👤</span>
+            )}
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-700">Profile Picture</p>
+            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Profile Picture</p>
             <button
               type="button"
-              className="text-sm text-blue-600 hover:text-blue-700 mt-1"
+              onClick={handleUploadClick}
+              className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 mt-1"
             >
               Upload new picture
             </button>
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
           </div>
         </div>
 
         {/* Full name */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
             Full Name
           </label>
           <input
@@ -184,13 +266,13 @@ export const ProfileSettings: React.FC = () => {
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             placeholder="Enter your full name"
-            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         {/* Email */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
             Email Address
           </label>
           <input
@@ -198,9 +280,9 @@ export const ProfileSettings: React.FC = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
-            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             We'll use this for important account notifications
           </p>
         </div>
