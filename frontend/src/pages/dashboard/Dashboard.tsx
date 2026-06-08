@@ -1,10 +1,10 @@
 /**
  * Dashboard Page
- * 
+ *
  * Main dashboard page for authenticated users.
  * Shows overview statistics, quick URL creation form, and list of user's URLs.
- * Acts as the home page after login.
- * 
+ * Acts as the home page after login. Supports dark mode.
+ *
  * Features:
  * - Statistics cards (total URLs, clicks, etc)
  * - Quick URL creation form
@@ -12,9 +12,10 @@
  * - Delete URL functionality
  * - View analytics functionality
  * - Responsive grid layout
- * 
+ * - Dark mode support
+ *
  * Props: None (uses auth context for user data)
- * 
+ *
  * Usage:
  * <Dashboard />
  */
@@ -41,10 +42,10 @@ interface URLItem {
 
 /**
  * Dashboard Component
- * 
+ *
  * Main dashboard page showing user's URL statistics and management tools.
  * Displays stats in cards, provides form to create URLs, and shows list of URLs.
- * 
+ *
  * @returns {React.ReactElement} Dashboard page
  */
 export const Dashboard: React.FC = () => {
@@ -128,31 +129,31 @@ export const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors">
       {/* Page content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
+
         {/* Header section */}
-        <div className="mb-8 flex items-center justify-between"> 
+        <div className="mb-8 flex items-center justify-between">
          <div>
-           <h1 className="text-3xl font-bold text-slate-900">
+           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
              Welcome back, {user?.name}! 👋
            </h1>
-           <p className="text-slate-600 mt-2">
+           <p className="text-slate-600 dark:text-slate-400 mt-2">
              Here's what's happening with your URLs today
            </p>
          </div>
          <div className="flex items-center gap-3">
            <button
              onClick={() => navigate('/urls')}
-             className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition"
+             className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg transition"
            >
              <List className="w-5 h-5" />
              <span>Manage URLs</span>
            </button>
            <button
              onClick={() => navigate('/settings')}
-             className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition"
+             className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg transition"
            >
              <Settings className="w-5 h-5" />
              <span>Settings</span>
@@ -161,7 +162,7 @@ export const Dashboard: React.FC = () => {
         </div>
         {/* Statistics grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          
+
           {/* Total URLs stat */}
           <StatsCard
             icon={<Link2 className="w-6 h-6" />}
@@ -199,7 +200,7 @@ export const Dashboard: React.FC = () => {
 
         {/* Main content grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          
+
           {/* Quick create form - spans 1 column */}
           <div className="lg:col-span-1">
             <QuickCreate
@@ -210,7 +211,7 @@ export const Dashboard: React.FC = () => {
 
           {/* URLs list - spans 2 columns */}
           <div className="lg:col-span-2">
-            <h2 className="text-xl font-bold text-slate-900 mb-4">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">
               Your URLs
             </h2>
             <URLsList
@@ -222,11 +223,11 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Quick tips section */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="font-semibold text-blue-900 mb-2">
+        <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-6 transition-colors">
+          <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">
             💡 Quick Tips
           </h3>
-          <ul className="text-sm text-blue-800 space-y-1">
+          <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1">
             <li>✓ Use descriptive custom codes for better brand recognition</li>
             <li>✓ Track analytics to see which links perform best</li>
             <li>✓ Share your short URLs to get more traffic</li>
