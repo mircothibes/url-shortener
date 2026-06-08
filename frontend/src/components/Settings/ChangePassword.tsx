@@ -2,8 +2,8 @@
  * ChangePassword Component
  *
  * Form for users to change their account password securely.
- * Validates old password and new password confirmation.
  * Uses updatePassword from AuthContext to persist the change in the mock database.
+ * Supports dark mode.
  *
  * Features:
  * - Old password verification (against mock database)
@@ -13,6 +13,7 @@
  * - Success/error messages
  * - Form validation
  * - Loading state
+ * - Dark mode support
  *
  * Props: None
  *
@@ -146,7 +147,7 @@ export const ChangePassword: React.FC = () => {
     try {
       /**
        * Update password via AuthContext.
-       * This validates the current password against the mock database
+       * Validates the current password against the mock database
        * and stores the new one, so it works on the next login.
        */
       await updatePassword(oldPassword, newPassword)
@@ -161,9 +162,6 @@ export const ChangePassword: React.FC = () => {
        */
       setTimeout(() => setSuccessMessage(''), 3000)
     } catch (error) {
-      /**
-       * Show the error coming from updatePassword (e.g. wrong current password)
-       */
       const message =
         error instanceof Error
           ? error.message
@@ -177,9 +175,9 @@ export const ChangePassword: React.FC = () => {
   const passwordStrength = getPasswordStrength(newPassword)
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6 transition-colors">
       {/* Section title */}
-      <h3 className="text-lg font-semibold text-slate-900 mb-6">
+      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-6">
         Change Password
       </h3>
 
@@ -188,21 +186,21 @@ export const ChangePassword: React.FC = () => {
 
         {/* Error message */}
         {errorMessage && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded">
             {errorMessage}
           </div>
         )}
 
         {/* Success message */}
         {successMessage && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+          <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 px-4 py-3 rounded">
             ✓ {successMessage}
           </div>
         )}
 
         {/* Old password */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
             Current Password
           </label>
           <input
@@ -210,16 +208,16 @@ export const ChangePassword: React.FC = () => {
             value={oldPassword}
             onChange={(e) => setOldPassword(e.target.value)}
             placeholder="Enter your current password"
-            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             (For demo: password is "demo123")
           </p>
         </div>
 
         {/* New password */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
             New Password
           </label>
           <input
@@ -227,32 +225,32 @@ export const ChangePassword: React.FC = () => {
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder="Enter your new password"
-            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
           {/* Password strength indicator */}
           {newPassword && (
             <div className="mt-2">
               <div className="flex items-center gap-2 mb-1">
-                <p className="text-xs text-slate-600">Strength:</p>
-                <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
+                <p className="text-xs text-slate-600 dark:text-slate-400">Strength:</p>
+                <div className="w-24 h-2 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden">
                   <div className={`h-full ${getStrengthColor(passwordStrength)} w-1/3`}></div>
                 </div>
-                <span className="text-xs font-medium text-slate-700 capitalize">
+                <span className="text-xs font-medium text-slate-700 dark:text-slate-300 capitalize">
                   {passwordStrength}
                 </span>
               </div>
             </div>
           )}
 
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             At least 8 characters
           </p>
         </div>
 
         {/* Confirm password */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
             Confirm Password
           </label>
           <input
@@ -260,13 +258,13 @@ export const ChangePassword: React.FC = () => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Confirm your new password"
-            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {newPassword && confirmPassword && newPassword === confirmPassword && (
-            <p className="text-xs text-green-600 mt-1">✓ Passwords match</p>
+            <p className="text-xs text-green-600 dark:text-green-400 mt-1">✓ Passwords match</p>
           )}
           {newPassword && confirmPassword && newPassword !== confirmPassword && (
-            <p className="text-xs text-red-600 mt-1">✗ Passwords do not match</p>
+            <p className="text-xs text-red-600 dark:text-red-400 mt-1">✗ Passwords do not match</p>
           )}
         </div>
 
