@@ -26,6 +26,7 @@
  */
 
 import React, { useState } from 'react'
+import { createURL } from '../../services/urls' 
 import { Button } from '../UI/Button'
 import { Copy, Check } from 'lucide-react'
 
@@ -155,29 +156,24 @@ export const QuickCreate: React.FC<QuickCreateProps> = ({
     setLoading(true)
     try {
       /**
-       * Simulate API call delay
-       * In production, this would be replaced with real API call
+       * Create the URL on the backend.
+       * Returns the created URL with the real short code from the API.
        */
-      await new Promise(resolve => setTimeout(resolve, 800))
+      const created = await createURL(originalUrl, customCode || undefined)
 
       /**
-       * Generate short code (use custom or auto-generate)
+       * Show success with the short code returned by the backend
        */
-      const shortCode = customCode || generateShortCode()
-
-      /**
-       * Simulate URL creation success
-       */
-      const successMessage = `Short URL created! Code: ${shortCode}`
+      const successMessage = `Short URL created! Code: ${created.shortCode}`
       setSuccess({
-        shortCode,
+        shortCode: created.shortCode,
         message: successMessage,
       })
 
       /**
-       * Call success callback
+       * Notify parent with the real data from the backend
        */
-      onSuccess(shortCode, originalUrl)
+      onSuccess(created.shortCode, created.originalUrl)
 
       /**
        * Reset form
