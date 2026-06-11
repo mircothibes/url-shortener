@@ -1,10 +1,15 @@
+import os
 import redis
 import json
 from datetime import timedelta
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
-redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
+redis_client = redis.Redis(
+    host=os.getenv("REDIS_HOST", "localhost"),
+    port=int(os.getenv("REDIS_PORT", "6379")),
+    decode_responses=True,
+)
 
 def cache_get(key: str):
     """Get value from Redis cache"""
