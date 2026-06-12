@@ -7,7 +7,9 @@ from app.database import SessionLocal
 from app.models import URL, Click, ClickAggregate, Webhook, WebhookLog, AuditLog
 
 # Create Celery app instance
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PORT = os.getenv("REDIS_PORT", "6379")
+REDIS_URL = os.getenv("REDIS_URL", f"redis://{REDIS_HOST}:{REDIS_PORT}/0")
 app = Celery(
     "url_shortener",
     broker=REDIS_URL,
