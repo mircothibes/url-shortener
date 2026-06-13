@@ -4,11 +4,12 @@
  * Main dashboard page for authenticated users.
  * Shows overview statistics, quick URL creation form, and list of user's URLs.
  * Acts as the home page after login. Supports dark mode.
+ * Fetches real URLs from the backend API.
  *
  * Features:
  * - Statistics cards (total URLs, clicks, etc)
  * - Quick URL creation form
- * - List of user's shortened URLs
+ * - List of user's shortened URLs (from backend)
  * - Delete URL functionality
  * - View analytics functionality
  * - Responsive grid layout
@@ -20,25 +21,14 @@
  * <Dashboard />
  */
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link2, BarChart3, Eye, TrendingUp, Settings, List } from 'lucide-react'
 import { StatsCard } from '../../components/Dashboard/StatsCard'
 import { URLsList } from '../../components/Dashboard/URLsList'
 import { QuickCreate } from '../../components/Dashboard/QuickCreate'
 import { useAuth } from '../../hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
-
-/**
- * Interface for URL item in dashboard
- */
-interface URLItem {
-  id: string
-  shortCode: string
-  originalUrl: string
-  clicks: number
-  createdAt: string
-  description?: string
-}
+import { listURLs, deleteURL, type URLItem } from '../../services/urls'
 
 /**
  * Dashboard Component
@@ -55,27 +45,49 @@ export const Dashboard: React.FC = () => {
   const { user } = useAuth()
 
   /**
-   * Mock URLs list for demonstration
-   * In production, would fetch from backend
+   * Router navigation hook
    */
-  const [urls, setUrls] = useState<URLItem[]>([
-    {
-      id: '1',
-      shortCode: 'abc123',
-      originalUrl: 'https://github.com/mircothibes/url-shortener',
-      clicks: 245,
-      createdAt: '2024-05-20T10:30:00Z',
-      description: 'My GitHub project',
-    },
-    {
-      id: '2',
-      shortCode: 'xyz789',
-      originalUrl: 'https://linkedin.com/in/marcosvtkemer',
-      clicks: 128,
-      createdAt: '2024-05-18T14:15:00Z',
-      description: 'My LinkedIn profile',
-    },
-  ])
+  const navigate = useNavigate()
+
+  /**
+   * URLs fetched from the backend
+   */
+  const [urls, setUrls] = useState<URLItem[]>([])
+
+  /**
+   * Loading state while fetching URLs
+   */
+  const [loading, setLoading] = useState(true)
+
+  /**
+   * Error message if the fetch fails
+   */
+  const [error, setError] = useState('')
+
+  /**
+   * Fetch URLs from the backend.
+   * Extracted so it can be reused after creating/deleting.
+   */
+  const fetchURLs = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const data = await listURLs()
+      setUrls(data)
+    } catch (err) {
+      console.error('Failed to load URLs:', err)
+      setError('Failed to load your URLs. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  /**
+   * Load URLs once when the page mounts.
+   */
+  useEffect(() => {
+    fetchURLs()
+  }, [])
 
   /**
    * Calculate total statistics from URLs
@@ -88,35 +100,33 @@ export const Dashboard: React.FC = () => {
   }
 
   /**
-   * Handle successful URL creation
-   * Adds new URL to the list
+   * Handle successful URL creation.
+   * Re-fetches the list from the backend so it stays in sync.
    */
-  const handleURLCreated = (shortCode: string, originalUrl: string) => {
-    const newURL: URLItem = {
-      id: Date.now().toString(),
-      shortCode,
-      originalUrl,
-      clicks: 0,
-      createdAt: new Date().toISOString(),
-    }
-    setUrls([newURL, ...urls])
+  const handleURLCreated = () => {
+    fetchURLs()
   }
 
   /**
-   * Handle URL deletion
-   * Removes URL from list
+   * Handle URL deletion.
+   * Calls the backend, then re-fetches the list.
    */
-  const handleDeleteURL = (id: string) => {
-    if (confirm('Are you sure you want to delete this URL?')) {
-      setUrls(urls.filter(url => url.id !== id))
+  const handleDeleteURL = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this URL?')) {
+      return
+    }
+    try {
+      await deleteURL(id)
+      fetchURLs()
+    } catch (err) {
+      console.error('Failed to delete URL:', err)
+      setError('Failed to delete the URL. Please try again.')
     }
   }
 
   /**
    * Handle view analytics
-   * In production, would navigate to analytics page
    */
-  const navigate = useNavigate()
   const handleViewAnalytics = (id: string) => {
     navigate(`/analytics/${id}`)
   }
@@ -214,11 +224,29 @@ export const Dashboard: React.FC = () => {
             <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">
               Your URLs
             </h2>
-            <URLsList
-              urls={urls}
-              onDelete={handleDeleteURL}
-              onAnalytics={handleViewAnalytics}
-            />
+
+            {/* Loading state */}
+            {loading && (
+              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-8 text-center transition-colors">
+                <p className="text-slate-600 dark:text-slate-400">Loading your URLs...</p>
+              </div>
+            )}
+
+            {/* Error state */}
+            {!loading && error && (
+              <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
+              </div>
+            )}
+
+            {/* URLs list */}
+            {!loading && !error && (
+              <URLsList
+                urls={urls}
+                onDelete={handleDeleteURL}
+                onAnalytics={handleViewAnalytics}
+              />
+            )}
           </div>
         </div>
 
