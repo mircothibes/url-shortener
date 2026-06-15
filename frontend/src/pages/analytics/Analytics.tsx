@@ -2,15 +2,15 @@
  * Analytics Page
  *
  * Complete analytics dashboard for a shortened URL.
- * Shows detailed statistics with multiple charts.
- * Displays clicks over time, country breakdown, device distribution.
+ * Fetches real analytics data from the backend API.
+ * Displays country breakdown and device distribution.
  * Supports dark mode.
  *
  * Features:
- * - Line chart for click trends
- * - Pie chart for countries
- * - Bar chart for devices
- * - Summary statistics
+ * - Pie chart for countries (real data)
+ * - Bar chart for devices (real data)
+ * - Summary statistics (real data)
+ * - Loading and error states
  * - Responsive grid layout
  * - Back button to dashboard
  * - Dark mode support
@@ -21,54 +21,18 @@
  * <Analytics />
  */
 
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
-import { Button } from '../../components/UI/Button'
-import { ClicksChart } from '../../components/Analytics/ClicksChart'
 import { CountriesChart } from '../../components/Analytics/CountriesChart'
 import { DeviceChart } from '../../components/Analytics/DeviceChart'
-
-/**
- * Mock analytics data for demonstration
- */
-const mockAnalyticsData = {
-  urlId: '1',
-  shortCode: 'abc123',
-  originalUrl: 'https://github.com/mircothibes/url-shortener',
-  totalClicks: 245,
-  uniqueVisitors: 189,
-  clicksData: [
-    { date: 'May 15', clicks: 12 },
-    { date: 'May 16', clicks: 19 },
-    { date: 'May 17', clicks: 8 },
-    { date: 'May 18', clicks: 25 },
-    { date: 'May 19', clicks: 18 },
-    { date: 'May 20', clicks: 31 },
-    { date: 'May 21', clicks: 28 },
-    { date: 'May 22', clicks: 22 },
-    { date: 'May 23', clicks: 35 },
-    { date: 'May 24', clicks: 42 },
-  ],
-  countriesData: [
-    { name: 'Brazil', value: 95 },
-    { name: 'USA', value: 68 },
-    { name: 'Germany', value: 45 },
-    { name: 'Japan', value: 25 },
-    { name: 'France', value: 12 },
-  ],
-  deviceData: [
-    { device: 'Mobile', clicks: 142, percentage: 58 },
-    { device: 'Desktop', clicks: 89, percentage: 36 },
-    { device: 'Tablet', clicks: 14, percentage: 6 },
-  ],
-}
+import { getAnalytics, type URLAnalytics } from '../../services/urls'
 
 /**
  * Analytics Component
  *
  * Main analytics page showing comprehensive statistics for a URL.
- * Displays multiple charts and summary information.
+ * Displays charts and summary information from real backend data.
  *
  * @returns {React.ReactElement} Analytics page
  */
@@ -77,6 +41,51 @@ export const Analytics: React.FC = () => {
    * Router navigation hook
    */
   const navigate = useNavigate()
+
+  /**
+   * URL id from the route (e.g. /analytics/:id)
+   */
+  const { urlId: id } = useParams<{ urlId: string }>()
+
+  /**
+   * Analytics data fetched from the backend
+   */
+  const [analytics, setAnalytics] = useState<URLAnalytics | null>(null)
+
+  /**
+   * Loading state while fetching
+   */
+  const [loading, setLoading] = useState(true)
+
+  /**
+   * Error message if the fetch fails
+   */
+  const [error, setError] = useState('')
+
+  /**
+   * Fetch analytics when the page mounts (or the id changes).
+   */
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      if (!id) {
+        setError('No URL selected.')
+        setLoading(false)
+        return
+      }
+      setLoading(true)
+      setError('')
+      try {
+        const data = await getAnalytics(id)
+        setAnalytics(data)
+      } catch (err) {
+        console.error('Failed to load analytics:', err)
+        setError('Failed to load analytics. Please try again.')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchAnalytics()
+  }, [id])
 
   /**
    * Handle back navigation to dashboard
@@ -102,81 +111,93 @@ export const Analytics: React.FC = () => {
         {/* Header section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            Analytics: {mockAnalyticsData.shortCode}
+            Analytics
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
-            {mockAnalyticsData.originalUrl}
+            Performance for this shortened URL
           </p>
         </div>
 
-        {/* Summary statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-
-          {/* Total clicks card */}
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6 transition-colors">
-            <h3 className="text-slate-600 dark:text-slate-400 text-sm font-medium mb-2">
-              Total Clicks
-            </h3>
-            <p className="text-4xl font-bold text-slate-900 dark:text-slate-100">
-              {mockAnalyticsData.totalClicks}
-            </p>
-            <p className="text-sm text-green-600 dark:text-green-400 mt-2">
-              ↑ 12.5% from last week
-            </p>
+        {/* Loading state */}
+        {loading && (
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-8 text-center transition-colors">
+            <p className="text-slate-600 dark:text-slate-400">Loading analytics...</p>
           </div>
+        )}
 
-          {/* Unique visitors card */}
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6 transition-colors">
-            <h3 className="text-slate-600 dark:text-slate-400 text-sm font-medium mb-2">
-              Unique Visitors
-            </h3>
-            <p className="text-4xl font-bold text-slate-900 dark:text-slate-100">
-              {mockAnalyticsData.uniqueVisitors}
-            </p>
-            <p className="text-sm text-green-600 dark:text-green-400 mt-2">
-              ↑ 8.2% from last week
-            </p>
+        {/* Error state */}
+        {!loading && error && (
+          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
           </div>
-        </div>
+        )}
 
-        {/* Charts grid */}
-        <div className="space-y-6 mb-8">
+        {/* Loaded content */}
+        {!loading && !error && analytics && (
+          <>
+            {/* Summary statistics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
 
-          {/* Clicks over time chart */}
-          <ClicksChart
-            data={mockAnalyticsData.clicksData}
-            title="Clicks Over Time"
-          />
+              {/* Total clicks card */}
+              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6 transition-colors">
+                <h3 className="text-slate-600 dark:text-slate-400 text-sm font-medium mb-2">
+                  Total Clicks
+                </h3>
+                <p className="text-4xl font-bold text-slate-900 dark:text-slate-100">
+                  {analytics.totalClicks}
+                </p>
+              </div>
 
-          {/* Country and device charts side by side */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Unique visitors card */}
+              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6 transition-colors">
+                <h3 className="text-slate-600 dark:text-slate-400 text-sm font-medium mb-2">
+                  Unique Visitors
+                </h3>
+                <p className="text-4xl font-bold text-slate-900 dark:text-slate-100">
+                  {analytics.uniqueVisitors}
+                </p>
+              </div>
+            </div>
 
-            {/* Countries chart */}
-            <CountriesChart
-              data={mockAnalyticsData.countriesData}
-              title="Clicks by Country"
-            />
+            {/* Charts grid */}
+            {analytics.totalClicks > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
 
-            {/* Device chart */}
-            <DeviceChart
-              data={mockAnalyticsData.deviceData}
-              title="Clicks by Device"
-            />
-          </div>
-        </div>
+                {/* Countries chart */}
+                <CountriesChart
+                  data={analytics.countriesData}
+                  title="Clicks by Country"
+                />
 
-        {/* Additional info section */}
-        <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-6 transition-colors">
-          <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-4">
-            📊 About This Analytics
-          </h3>
-          <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-2">
-            <li>✓ Data is updated in real-time</li>
-            <li>✓ Geolocation determined from user IP address</li>
-            <li>✓ Device type detected from User-Agent</li>
-            <li>✓ All data is anonymized and privacy-respecting</li>
-          </ul>
-        </div>
+                {/* Device chart */}
+                <DeviceChart
+                  data={analytics.deviceData}
+                  title="Clicks by Device"
+                />
+              </div>
+            ) : (
+              /* No clicks yet */
+              <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-8 text-center mb-8 transition-colors">
+                <p className="text-slate-600 dark:text-slate-400">
+                  No clicks recorded yet. Share your short URL to start collecting analytics.
+                </p>
+              </div>
+            )}
+
+            {/* Additional info section */}
+            <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-6 transition-colors">
+              <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-4">
+                📊 About This Analytics
+              </h3>
+              <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-2">
+                <li>✓ Data is updated in real-time</li>
+                <li>✓ Geolocation determined from user IP address</li>
+                <li>✓ Device type detected from User-Agent</li>
+                <li>✓ All data is anonymized and privacy-respecting</li>
+              </ul>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
