@@ -1575,9 +1575,16 @@ async def redirect_to_original(
     
     if not url:
         raise HTTPException(status_code=404, detail="URL not found")
-    
-    # Handle both dict (from cache) and object (from DB)
-    url_is_active = url.get('is_active') if isinstance(url, dict) else url.is_active
+
+    # The cache stores a dict, but the rest of this endpoint works with a
+    # SQLAlchemy object. To keep behavior consistent, always resolve the
+    # real object from the database before proceeding. The cache above is
+    # still useful as a fast existence check.
+    if isinstance(url, dict):
+        url = db.query(URL).filter(URL.short_code == short_code).first()
+        if not url:
+            raise HTTPException(status_code=404, detail="URL not found")
+
     if not url.is_active:
         raise HTTPException(status_code=410, detail="URL is no longer available")
     
