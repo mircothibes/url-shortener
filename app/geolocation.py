@@ -1,5 +1,10 @@
 """Geolocation service using IP address"""
-import geoip2.database
+try:
+    import geoip2.database
+    GEOIP2_AVAILABLE = True
+except ImportError:
+    GEOIP2_AVAILABLE = False
+
 import os
 from typing import Optional, Dict
 import logging
@@ -15,7 +20,7 @@ class GeoLocationService:
         self.db_path = os.getenv("GEOIP_DB_PATH", None)
         self.reader = None
         
-        if self.db_path and os.path.exists(self.db_path):
+        if GEOIP2_AVAILABLE and self.db_path and os.path.exists(self.db_path):
             try:
                 self.reader = geoip2.database.Reader(self.db_path)
             except Exception as e:
