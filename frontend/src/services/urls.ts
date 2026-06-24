@@ -77,6 +77,42 @@ export const createURL = async (
 }
 
 /**
+ * Fields that can be updated on an existing URL.
+ * All optional: only the provided fields are sent to the API.
+ */
+export interface URLUpdateInput {
+  originalUrl?: string
+  description?: string
+  isActive?: boolean
+}
+
+/**
+ * Update editable fields of an existing URL.
+ * Sends only the fields present in the input (partial update).
+ *
+ * @param {string} id - The URL id to update
+ * @param {URLUpdateInput} input - Fields to change
+ * @returns {Promise<URLItem>} The updated URL in frontend shape
+ */
+export const updateURL = async (
+  id: string,
+  input: URLUpdateInput
+): Promise<URLItem> => {
+  const body: Record<string, unknown> = {}
+  if (input.originalUrl !== undefined) {
+    body.original_url = input.originalUrl
+  }
+  if (input.description !== undefined) {
+    body.description = input.description
+  }
+  if (input.isActive !== undefined) {
+    body.is_active = input.isActive
+  }
+  const response = await api.patch<URLResponseRaw>(`/api/v1/urls/${id}`, body)
+  return mapURL(response.data)
+}
+
+/**
  * Delete a URL by its id.
  *
  * @param {string} id - The URL id to delete
