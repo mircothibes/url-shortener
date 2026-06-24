@@ -3,10 +3,10 @@
  *
  * Complete URL management interface backed by the real API.
  * Lists all of the user's active URLs with search, sort, and filter,
- * and supports deleting, copying, and navigating to analytics.
+ * and supports editing, deleting, copying, and navigating to analytics.
  * Supports dark mode.
  *
- * Data comes from the backend via the urls service (listURLs / deleteURL).
+ * Data comes from the backend via the urls service (listURLs / updateURL / deleteURL).
  *
  * Props: None (uses hooks)
  *
@@ -19,6 +19,7 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { URLCard } from '../../components/URLManagement/URLCard'
 import { SearchBar } from '../../components/URLManagement/SearchBar'
+import { EditURLModal } from '../../components/URLManagement/EditURLModal'
 import { listURLs, deleteURL } from '../../services/urls'
 import type { URLItem } from '../../services/urls'
 
@@ -83,6 +84,11 @@ export const URLManagement: React.FC = () => {
    * Filter status state
    */
   const [filterStatus, setFilterStatus] = useState('all')
+
+  /**
+   * URL currently being edited (drives the edit modal)
+   */
+  const [editingUrl, setEditingUrl] = useState<URLItem | null>(null)
 
   /**
    * Fetch the user's URLs from the backend on mount.
@@ -191,10 +197,24 @@ export const URLManagement: React.FC = () => {
   }
 
   /**
-   * Handle edit URL (wired in Part 2, once the backend update endpoint exists)
+   * Handle edit URL: open the edit modal for the selected URL.
    */
   const handleEditURL = (id: string) => {
-    console.log('Edit URL:', id)
+    const url = urls.find((item) => item.id === id)
+    if (url) {
+      setEditingUrl(url)
+    }
+  }
+
+  /**
+   * Handle a successful save from the edit modal:
+   * replace the URL in local state and close the modal.
+   */
+  const handleUrlSaved = (updated: URLItem) => {
+    setUrls((prev) =>
+      prev.map((url) => (url.id === updated.id ? updated : url))
+    )
+    setEditingUrl(null)
   }
 
   /**
@@ -309,6 +329,15 @@ export const URLManagement: React.FC = () => {
           </>
         )}
       </div>
+
+      {/* Edit modal */}
+      {editingUrl && (
+        <EditURLModal
+          url={editingUrl}
+          onClose={() => setEditingUrl(null)}
+          onSaved={handleUrlSaved}
+        />
+      )}
     </div>
   )
 }
