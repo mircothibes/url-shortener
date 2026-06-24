@@ -1741,6 +1741,110 @@ async def admin_update_rate_limit(
 
 
 # ============================================================================
+# URL Update Endpoint
+# ============================================================================
+
+class URLUpdateRequest(BaseModel):
+    """Request model for updating an existing shortened URL"""
+    original_url: Optional[str] = None
+    description: Optional[str] = None
+    is_active: Optional[bool] = None
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "original_url": "https://github.com/mircothibes/url-shortener",
+                "description": "Updated description",
+                "is_active": True,
+            }
+        }
+    )
+
+
+@app.patch(
+    "/api/v1/urls/{url_id}",
+    response_model=URLResponse,
+    tags=["URLs"],
+    summary="Update URL",
+    description="Updates editable fields of a shortened URL (original_url, description, is_active)",
+    responses={
+        200: {"description": "URL updated successfully"},
+        404: {"description": "URL not found"},
+        422: {"description": "Validation error"},
+    },
+)
+@limiter.limit("300/15 minutes")
+async def update_url(
+    request: Request,
+    url_id: int,
+    url_update: URLUpdateRequest,
+    db: Session = Depends(get_db),
+    user_id: UUID = Depends(get_current_user),
+):
+    """
+    Update editable fields of a shortened URL.
+
+    Only the fields provided in the request body are changed
+    (partial update). Editable fields: original_url, description, is_active.
+
+    Args:
+        request: FastAPI request object
+        url_id: URL record ID
+        url_update: Fields to update
+        db: Database session
+        user_id: Authenticated user ID
+
+    Returns:
+        URLResponse: The updated URL data
+
+    Raises:
+        HTTPException: If the URL is not found, does not belong to the user,
+            or the new URL format is invalid
+    """
+    url = db.query(URL).filter(
+        URL.id == url_id,
+        URL.user_id == user_id,
+    ).first()
+
+    if not url:
+        raise HTTPException(status_code=404, detail="URL not found")
+
+    # Only apply fields explicitly provided in the request body
+    updated_fields = url_update.model_dump(exclude_unset=True)
+
+    if "original_url" in updated_fields:
+        new_url = updated_fields["original_url"]
+        if not new_url.startswith(("http://", "https://")):
+            raise HTTPException(
+                status_code=422,
+                detail="Invalid URL format. Must start with http:// or https://",
+            )
+        url.original_url = new_url
+
+    if "description" in updated_fields:
+        url.description = updated_fields["description"]
+
+    if "is_active" in updated_fields:
+        url.is_active = updated_fields["is_active"]
+
+    # updated_at is refreshed automatically via the model's onupdate
+    db.commit()
+    db.refresh(url)
+
+    audit = AuditLog(
+        user_id=user_id,
+        action="UPDATE_URL",
+        resource_type="URL",
+        resource_id=str(url_id),
+        details={"updated_fields": list(updated_fields.keys())},
+    )
+    db.add(audit)
+    db.commit()
+
+    return url
+
+
+# ============================================================================
 # Exception Handlers
 # ============================================================================
 
