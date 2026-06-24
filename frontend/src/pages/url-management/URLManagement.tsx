@@ -1,22 +1,12 @@
 /**
  * URLManagement Page
  *
- * Complete URL management interface for users.
- * Display all user URLs with search, filter, and management options.
- * Allows editing, deleting, copying, and viewing analytics for each URL.
+ * Complete URL management interface backed by the real API.
+ * Lists all of the user's active URLs with search, sort, and filter,
+ * and supports deleting, copying, and navigating to analytics.
  * Supports dark mode.
  *
- * Features:
- * - Search URLs by short code or original URL
- * - Sort by date or clicks
- * - Filter by status
- * - Delete URLs with confirmation
- * - Copy short code to clipboard
- * - Navigate to analytics
- * - Edit URL details
- * - Grid and list view options
- * - Empty state message
- * - Dark mode support
+ * Data comes from the backend via the urls service (listURLs / deleteURL).
  *
  * Props: None (uses hooks)
  *
@@ -24,99 +14,37 @@
  * <URLManagement />
  */
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
-import { useAuth } from '../../hooks/useAuth'
 import { URLCard } from '../../components/URLManagement/URLCard'
 import { SearchBar } from '../../components/URLManagement/SearchBar'
+import { listURLs, deleteURL } from '../../services/urls'
+import type { URLItem } from '../../services/urls'
 
 /**
- * Mock URL data interface
+ * Format an ISO date string into a short, human-readable form.
+ * Falls back to the raw value if it cannot be parsed.
+ *
+ * @param {string} iso - ISO date string from the API
+ * @returns {string} Formatted date (e.g., "May 20, 2024")
  */
-interface URLData {
-  /**
-   * Unique URL identifier
-   */
-  id: string
-
-  /**
-   * Generated short code
-   */
-  shortCode: string
-
-  /**
-   * Original long URL
-   */
-  originalUrl: string
-
-  /**
-   * Total clicks on this URL
-   */
-  clicks: number
-
-  /**
-   * Creation date as formatted string
-   */
-  createdAt: string
-
-  /**
-   * URL status (active or inactive)
-   */
-  status: 'active' | 'inactive'
+const formatDate = (iso: string): string => {
+  const date = new Date(iso)
+  if (isNaN(date.getTime())) {
+    return iso
+  }
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
 }
-
-/**
- * Mock URLs data for demonstration
- */
-const mockURLs: URLData[] = [
-  {
-    id: '1',
-    shortCode: 'abc123',
-    originalUrl: 'https://github.com/mircothibes/url-shortener',
-    clicks: 245,
-    createdAt: 'May 20, 2024',
-    status: 'active',
-  },
-  {
-    id: '2',
-    shortCode: 'xyz789',
-    originalUrl: 'https://linkedin.com/in/marcosvtkemer',
-    clicks: 128,
-    createdAt: 'May 18, 2024',
-    status: 'active',
-  },
-  {
-    id: '3',
-    shortCode: 'def456',
-    originalUrl: 'https://example.com/very-long-url-path',
-    clicks: 87,
-    createdAt: 'May 15, 2024',
-    status: 'active',
-  },
-  {
-    id: '4',
-    shortCode: 'ghi789',
-    originalUrl: 'https://example.com/another-long-url',
-    clicks: 42,
-    createdAt: 'May 10, 2024',
-    status: 'inactive',
-  },
-  {
-    id: '5',
-    shortCode: 'jkl012',
-    originalUrl: 'https://example.com/inactive-link',
-    clicks: 0,
-    createdAt: 'May 5, 2024',
-    status: 'inactive',
-  },
-]
 
 /**
  * URLManagement Component
  *
- * Main page for managing shortened URLs.
- * Displays all user URLs with search and management features.
+ * Main page for managing shortened URLs, backed by the API.
  *
  * @returns {React.ReactElement} URL management page
  */
@@ -127,9 +55,19 @@ export const URLManagement: React.FC = () => {
   const navigate = useNavigate()
 
   /**
-   * Auth context hook
+   * URLs fetched from the backend
    */
-  const { user } = useAuth()
+  const [urls, setUrls] = useState<URLItem[]>([])
+
+  /**
+   * Loading state while fetching URLs
+   */
+  const [loading, setLoading] = useState(true)
+
+  /**
+   * Error message when fetching fails
+   */
+  const [error, setError] = useState<string | null>(null)
 
   /**
    * Search term state
@@ -147,12 +85,39 @@ export const URLManagement: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState('all')
 
   /**
-   * URLs state (mock data)
+   * Fetch the user's URLs from the backend on mount.
    */
-  const [urls, setUrls] = useState<URLData[]>(mockURLs)
+  useEffect(() => {
+    let active = true
+
+    const load = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const data = await listURLs()
+        if (active) {
+          setUrls(data)
+        }
+      } catch {
+        if (active) {
+          setError('Failed to load your URLs. Please try again.')
+        }
+      } finally {
+        if (active) {
+          setLoading(false)
+        }
+      }
+    }
+
+    load()
+
+    return () => {
+      active = false
+    }
+  }, [])
 
   /**
-   * Filter and sort URLs based on search, sort, and filter options
+   * Filter and sort URLs based on search, sort, and filter options.
    */
   const filteredURLs = useMemo(() => {
     let result = [...urls]
@@ -161,10 +126,11 @@ export const URLManagement: React.FC = () => {
      * Apply search filter
      */
     if (searchTerm) {
+      const term = searchTerm.toLowerCase()
       result = result.filter(
         (url) =>
-          url.shortCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          url.originalUrl.toLowerCase().includes(searchTerm.toLowerCase())
+          url.shortCode.toLowerCase().includes(term) ||
+          url.originalUrl.toLowerCase().includes(term)
       )
     }
 
@@ -172,7 +138,8 @@ export const URLManagement: React.FC = () => {
      * Apply status filter
      */
     if (filterStatus !== 'all') {
-      result = result.filter((url) => url.status === filterStatus)
+      const wantActive = filterStatus === 'active'
+      result = result.filter((url) => url.isActive === wantActive)
     }
 
     /**
@@ -180,7 +147,10 @@ export const URLManagement: React.FC = () => {
      */
     switch (sortBy) {
       case 'oldest':
-        result.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+        result.sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        )
         break
       case 'most-clicks':
         result.sort((a, b) => b.clicks - a.clicks)
@@ -190,7 +160,10 @@ export const URLManagement: React.FC = () => {
         break
       case 'newest':
       default:
-        result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        result.sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
         break
     }
 
@@ -198,10 +171,16 @@ export const URLManagement: React.FC = () => {
   }, [urls, searchTerm, sortBy, filterStatus])
 
   /**
-   * Handle delete URL
+   * Handle delete URL through the API, then remove it from local state.
+   * The URLCard already asks for confirmation before calling this.
    */
-  const handleDeleteURL = (id: string) => {
-    setUrls(urls.filter((url) => url.id !== id))
+  const handleDeleteURL = async (id: string) => {
+    try {
+      await deleteURL(id)
+      setUrls((prev) => prev.filter((url) => url.id !== id))
+    } catch {
+      window.alert('Failed to delete the URL. Please try again.')
+    }
   }
 
   /**
@@ -212,7 +191,7 @@ export const URLManagement: React.FC = () => {
   }
 
   /**
-   * Handle edit URL
+   * Handle edit URL (wired in Part 2, once the backend update endpoint exists)
    */
   const handleEditURL = (id: string) => {
     console.log('Edit URL:', id)
@@ -259,46 +238,75 @@ export const URLManagement: React.FC = () => {
           onFilterChange={setFilterStatus}
         />
 
-        {/* Results summary */}
-        <div className="mb-4">
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            Showing <span className="font-semibold dark:text-slate-200">{filteredURLs.length}</span> of{' '}
-            <span className="font-semibold dark:text-slate-200">{urls.length}</span> URLs
-          </p>
-        </div>
-
-        {/* URLs grid */}
-        {filteredURLs.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filteredURLs.map((url) => (
-              <URLCard
-                key={url.id}
-                id={url.id}
-                shortCode={url.shortCode}
-                originalUrl={url.originalUrl}
-                clicks={url.clicks}
-                createdAt={url.createdAt}
-                onDelete={handleDeleteURL}
-                onAnalytics={handleViewAnalytics}
-                onEdit={handleEditURL}
-              />
-            ))}
-          </div>
-        ) : (
+        {loading ? (
           /**
-           * Empty state message
+           * Loading state
+           */
+          <div className="text-center py-12 text-slate-600 dark:text-slate-400">
+            Loading your URLs...
+          </div>
+        ) : error ? (
+          /**
+           * Error state
            */
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">🔍</div>
+            <div className="text-6xl mb-4">⚠️</div>
             <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
-              No URLs found
+              Something went wrong
             </h2>
-            <p className="text-slate-600 dark:text-slate-400 mb-6">
-              {searchTerm || filterStatus !== 'all'
-                ? 'Try adjusting your search or filters'
-                : 'Create your first shortened URL in the Dashboard'}
-            </p>
+            <p className="text-slate-600 dark:text-slate-400">{error}</p>
           </div>
+        ) : (
+          <>
+            {/* Results summary */}
+            <div className="mb-4">
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Showing{' '}
+                <span className="font-semibold dark:text-slate-200">
+                  {filteredURLs.length}
+                </span>{' '}
+                of{' '}
+                <span className="font-semibold dark:text-slate-200">
+                  {urls.length}
+                </span>{' '}
+                URLs
+              </p>
+            </div>
+
+            {/* URLs grid */}
+            {filteredURLs.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {filteredURLs.map((url) => (
+                  <URLCard
+                    key={url.id}
+                    id={url.id}
+                    shortCode={url.shortCode}
+                    originalUrl={url.originalUrl}
+                    clicks={url.clicks}
+                    createdAt={formatDate(url.createdAt)}
+                    onDelete={handleDeleteURL}
+                    onAnalytics={handleViewAnalytics}
+                    onEdit={handleEditURL}
+                  />
+                ))}
+              </div>
+            ) : (
+              /**
+               * Empty state message
+               */
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">🔍</div>
+                <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                  No URLs found
+                </h2>
+                <p className="text-slate-600 dark:text-slate-400 mb-6">
+                  {searchTerm || filterStatus !== 'all'
+                    ? 'Try adjusting your search or filters'
+                    : 'Create your first shortened URL in the Dashboard'}
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
