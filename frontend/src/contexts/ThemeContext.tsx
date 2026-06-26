@@ -21,7 +21,8 @@
  * const { theme, setTheme } = useTheme()
  */
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 
 /**
  * Available theme options
