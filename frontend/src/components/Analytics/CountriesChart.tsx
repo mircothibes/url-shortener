@@ -114,13 +114,13 @@ export const CountriesChart: React.FC<CountriesChartProps> = ({
             cx="50%"
             cy="50%"
             labelLine={false}
-            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+            label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
             outerRadius={80}
             fill="#8884d8"
             dataKey="value"
           >
             {/* Color each segment */}
-            {data.map((entry, index) => (
+            {data.map((_, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
@@ -128,11 +128,18 @@ export const CountriesChart: React.FC<CountriesChartProps> = ({
           <Legend
             verticalAlign="bottom"
             height={36}
-            formatter={(value, entry) => {
-              const percentage = ((entry.payload.value / totalClicks) * 100).toFixed(1)
+            formatter={(_value, entry) => {
+              const payload = entry?.payload as
+                | { name?: string; value?: number }
+                | undefined
+              const count = payload?.value ?? 0
+              const percentage =
+                totalClicks > 0
+                  ? ((count / totalClicks) * 100).toFixed(1)
+                  : '0.0'
               return (
                 <span style={{ color: legendColor }}>
-                  {entry.payload.name} ({percentage}%)
+                  {payload?.name} ({percentage}%)
                 </span>
               )
             }}
