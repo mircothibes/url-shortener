@@ -111,19 +111,6 @@ export const QuickCreate: React.FC<QuickCreateProps> = ({
   }
 
   /**
-   * Generate random short code
-   * Used if custom code not provided
-   */
-  const generateShortCode = (): string => {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-    let code = ''
-    for (let i = 0; i < 6; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length))
-    }
-    return code
-  }
-
-  /**
    * Handle form submission
    * Validates inputs and creates short URL
    */
