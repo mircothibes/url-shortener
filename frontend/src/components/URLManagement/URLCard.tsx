@@ -39,7 +39,6 @@
  */
 
 import React, { useState } from 'react'
-import { Button } from '../UI/Button'
 
 /**
  * Props interface for URLCard component
