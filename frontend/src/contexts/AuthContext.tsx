@@ -28,7 +28,8 @@
  * </AuthProvider>
  */
 
-import React, { createContext, useState, useEffect, ReactNode } from 'react'
+import React, { createContext, useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 
 /**
  * User interface - represents authenticated user data
