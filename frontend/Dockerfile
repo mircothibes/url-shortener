@@ -8,9 +8,15 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# Build the static site. Vite reads VITE_* values from .env at build
-# time and bakes them into the bundle. This .env stays in the build
-# stage only and never reaches the final image.
+# Public build-time config, injected as build args and baked into the
+# bundle. Passed explicitly at build time (via cloudbuild.yaml) instead
+# of relying on a .env file, which gcloud excludes from the build context.
+ARG VITE_API_URL
+ARG VITE_API_KEY
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_API_KEY=$VITE_API_KEY
+
+# Build the static site
 COPY . .
 RUN npm run build
 
