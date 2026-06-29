@@ -257,3 +257,8 @@ url-shortener/
 └── docker-compose.yml    # Local Postgres + Redis
 ```
 
+## 👨‍💻 Author
+**Marcos Vinicius Thibes Kemer** 
+
+## 📄 License
+MIT License — see the LICENSE file for details.
