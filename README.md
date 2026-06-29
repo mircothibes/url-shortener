@@ -1,4 +1,3 @@
-cat > README.md << 'MDEOF'
 # URL Shortener & Analytics SaaS
 
 ![Live](https://img.shields.io/badge/Status-Live-brightgreen)
