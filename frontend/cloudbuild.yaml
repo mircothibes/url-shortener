@@ -1,0 +1,21 @@
+# Cloud Build config for the frontend.
+# Builds the Docker image passing public build-time config as build args,
+# then pushes it. The actual values come from --substitutions at submit time,
+# so no secrets are stored in this file or the repo.
+substitutions:
+  _VITE_API_URL: ""
+  _VITE_API_KEY: ""
+  _IMAGE: ""
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - build
+      - --build-arg
+      - VITE_API_URL=${_VITE_API_URL}
+      - --build-arg
+      - VITE_API_KEY=${_VITE_API_KEY}
+      - -t
+      - ${_IMAGE}
+      - .
+images:
+  - ${_IMAGE}
