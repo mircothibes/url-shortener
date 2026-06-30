@@ -256,6 +256,8 @@ url-shortener/
 └── docker-compose.yml    # Local Postgres + Redis
 ```
 
+---
+
 ## 👨‍💻 Author
 **Marcos Vinicius Thibes Kemer** 
 
