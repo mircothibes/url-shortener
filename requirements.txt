@@ -11,3 +11,4 @@ passlib==1.7.4
 argon2-cffi==25.1.0
 qrcode==7.4.2
 slowapi==0.1.9
+PyJWT==2.9.0
