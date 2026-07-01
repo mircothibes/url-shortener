@@ -15,7 +15,7 @@ from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.responses import RedirectResponse, JSONResponse, StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import func, text
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from app.cors import get_cors_config, validate_cors_config
 from app.rate_limit import limiter, rate_limit_error_handler
@@ -26,6 +26,13 @@ from app.models import User, URL, Click, AuditLog, UserRateLimit
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
+from app.auth import (
+    hash_password,
+    verify_password,
+    generate_api_key,
+    create_access_token,
+    decode_access_token,
+)
 from app.qrcode import generate_qrcode_png
 
 from app.batch import BatchURLRequest, BatchURLResponse, BatchErrorResponse, validate_batch_request
@@ -178,32 +185,42 @@ async def get_current_user(
     db: Session = Depends(get_db)
 ) -> UUID:
     """
-    Verify API key and return authenticated user ID.
-    
-    Args:
-        request: FastAPI request object
-        db: Database session
-        
-    Returns:
-        UUID: User ID if authentication successful
-        
+    Authenticate the request and return the user ID.
+
+    Accepts either a JWT access token (preferred) or a legacy API key in the
+    "Authorization: Bearer <token>" header. The JWT is tried first; if the value
+    is not a valid token, it is treated as an API key. This dual mode keeps
+    existing API-key clients working while enabling JWT-based auth.
+
     Raises:
-        HTTPException: If API key is missing, invalid, or user is inactive
+        HTTPException: If credentials are missing, invalid, or the user is inactive
     """
     auth_header = request.headers.get("Authorization", "")
-    
+
     if not auth_header.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing API key")
-    
-    api_key = auth_header.replace("Bearer ", "")
-    user = db.query(User).filter(User.api_key == api_key).first()
-    
+        raise HTTPException(status_code=401, detail="Missing credentials")
+
+    token = auth_header.replace("Bearer ", "", 1)
+
+    # 1) Try JWT first
+    jwt_user_id = decode_access_token(token)
+    if jwt_user_id:
+        user = db.query(User).filter(User.id == jwt_user_id).first()
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid or expired token")
+        if not user.is_active:
+            raise HTTPException(status_code=403, detail="User is inactive")
+        return user.id
+
+    # 2) Fall back to legacy API key
+    user = db.query(User).filter(User.api_key == token).first()
+
     if not user:
-        raise HTTPException(status_code=401, detail="Invalid API key")
-    
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
     if not user.is_active:
         raise HTTPException(status_code=403, detail="User is inactive")
-    
+
     return user.id
 
 
@@ -1842,6 +1859,124 @@ async def update_url(
     db.commit()
 
     return url
+
+
+# ============================================================================
+# Authentication Endpoints
+# ============================================================================
+
+class RegisterRequest(BaseModel):
+    """Request body for user registration"""
+    email: str
+    password: str
+
+    @field_validator("email")
+    @classmethod
+    def _validate_email(cls, v: str) -> str:
+        v = v.strip().lower()
+        if "@" not in v or "." not in v.split("@")[-1]:
+            raise ValueError("Invalid email format")
+        return v
+
+    @field_validator("password")
+    @classmethod
+    def _validate_password(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters")
+        return v
+
+
+class LoginRequest(BaseModel):
+    """Request body for user login"""
+    email: str
+    password: str
+
+
+class TokenResponse(BaseModel):
+    """Authentication response containing a JWT access token"""
+    access_token: str
+    token_type: str = "bearer"
+    user_id: str
+    email: str
+    api_key: Optional[str] = None
+
+
+@app.post(
+    "/api/v1/auth/register",
+    response_model=TokenResponse,
+    status_code=201,
+    tags=["Auth"],
+    summary="Register a new user",
+)
+@limiter.limit("10/15 minutes")
+async def register(
+    request: Request,
+    body: RegisterRequest,
+    db: Session = Depends(get_db),
+):
+    """Create a new user account and return a JWT access token."""
+    email = body.email.strip().lower()
+
+    if db.query(User).filter(User.email == email).first():
+        raise HTTPException(status_code=409, detail="Email already registered")
+
+    user = User(
+        email=email,
+        hashed_password=hash_password(body.password),
+        api_key=generate_api_key(),
+        is_active=True,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    audit = AuditLog(
+        user_id=user.id,
+        action="REGISTER",
+        resource_type="USER",
+        resource_id=str(user.id),
+        details={},
+    )
+    db.add(audit)
+    db.commit()
+
+    token = create_access_token(str(user.id))
+    return TokenResponse(
+        access_token=token,
+        user_id=str(user.id),
+        email=user.email,
+        api_key=user.api_key,
+    )
+
+
+@app.post(
+    "/api/v1/auth/login",
+    response_model=TokenResponse,
+    tags=["Auth"],
+    summary="Log in and obtain a JWT access token",
+)
+@limiter.limit("10/15 minutes")
+async def login(
+    request: Request,
+    body: LoginRequest,
+    db: Session = Depends(get_db),
+):
+    """Authenticate by email and password and return a JWT access token."""
+    email = body.email.strip().lower()
+    user = db.query(User).filter(User.email == email).first()
+
+    if not user or not verify_password(body.password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="User is inactive")
+
+    token = create_access_token(str(user.id))
+    return TokenResponse(
+        access_token=token,
+        user_id=str(user.id),
+        email=user.email,
+    )
 
 
 # ============================================================================
