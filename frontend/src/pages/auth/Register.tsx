@@ -107,8 +107,8 @@ export const Register: React.FC = () => {
     /**
      * Password length validation
      */
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters')
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters')
       return
     }
 
@@ -134,7 +134,7 @@ export const Register: React.FC = () => {
       /**
        * Display error message if registration fails
        */
-      setError('Registration failed. Email may already be in use.')
+      setError(err instanceof Error ? err.message : 'Registration failed. Please try again.')
       console.error('Register error:', err)
     }
   }
