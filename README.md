@@ -20,7 +20,7 @@ A production-grade, full-stack URL shortener with click analytics, geolocation, 
 | **API** | https://url-shortener-1000156659602.us-central1.run.app |
 | **API Docs (Swagger)** | https://url-shortener-1000156659602.us-central1.run.app/docs |
 
-**Demo login:** `demo@example.com` / `demo123`
+**Demo login:** `demo@example.com` / `demo123456`
 
 ## 🏗️ Architecture
 ```
