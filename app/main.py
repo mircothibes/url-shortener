@@ -1973,6 +1973,149 @@ async def login(
 
 
 # ============================================================================
+# Account Management Endpoints (profile + password)
+# ============================================================================
+
+class UserResponse(BaseModel):
+    """Public representation of a user account"""
+    id: str
+    email: str
+    is_active: bool
+
+
+class UpdateProfileRequest(BaseModel):
+    """Request body for updating the current user's profile"""
+    email: str
+
+    @field_validator("email")
+    @classmethod
+    def _validate_email(cls, v: str) -> str:
+        v = v.strip().lower()
+        if "@" not in v or "." not in v.split("@")[-1]:
+            raise ValueError("Invalid email format")
+        return v
+
+
+class ChangePasswordRequest(BaseModel):
+    """Request body for changing the current user's password"""
+    current_password: str
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def _validate_new_password(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters")
+        return v
+
+
+@app.get(
+    "/api/v1/auth/me",
+    response_model=UserResponse,
+    tags=["Auth"],
+    summary="Get the current authenticated user",
+)
+async def get_me(
+    user_id: UUID = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Return the profile of the currently authenticated user."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return UserResponse(
+        id=str(user.id),
+        email=user.email,
+        is_active=user.is_active,
+    )
+
+
+@app.patch(
+    "/api/v1/auth/me",
+    response_model=UserResponse,
+    tags=["Auth"],
+    summary="Update the current user's profile",
+)
+@limiter.limit("20/15 minutes")
+async def update_me(
+    request: Request,
+    body: UpdateProfileRequest,
+    user_id: UUID = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Update the current user's email (the only editable profile field)."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    new_email = body.email.strip().lower()
+    if new_email != user.email:
+        existing = (
+            db.query(User)
+            .filter(User.email == new_email, User.id != user.id)
+            .first()
+        )
+        if existing:
+            raise HTTPException(status_code=409, detail="Email already in use")
+
+        user.email = new_email
+        db.add(AuditLog(
+            user_id=user.id,
+            action="UPDATE_PROFILE",
+            resource_type="USER",
+            resource_id=str(user.id),
+            details={},
+        ))
+        db.commit()
+        db.refresh(user)
+
+    return UserResponse(
+        id=str(user.id),
+        email=user.email,
+        is_active=user.is_active,
+    )
+
+
+@app.post(
+    "/api/v1/auth/change-password",
+    tags=["Auth"],
+    summary="Change the current user's password",
+)
+@limiter.limit("10/15 minutes")
+async def change_password(
+    request: Request,
+    body: ChangePasswordRequest,
+    user_id: UUID = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Change the current user's password after verifying the current one."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if not verify_password(body.current_password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Current password is incorrect")
+
+    if body.current_password == body.new_password:
+        raise HTTPException(
+            status_code=400,
+            detail="New password must be different from the current one",
+        )
+
+    user.hashed_password = hash_password(body.new_password)
+    db.add(AuditLog(
+        user_id=user.id,
+        action="CHANGE_PASSWORD",
+        resource_type="USER",
+        resource_id=str(user.id),
+        details={},
+    ))
+    db.commit()
+
+    return {"message": "Password updated successfully"}
+
+
+# ============================================================================
 # Exception Handlers
 # ============================================================================
 
