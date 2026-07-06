@@ -160,22 +160,15 @@ class AnalyticsResponse(BaseModel):
 
 def get_db():
     """
-    Dependency function to get database session.
+    Dependency that provides a database session.
+
+    The session is always closed when the request finishes. Request
+    processing errors (validation, HTTP exceptions, etc.) are left to
+    propagate so FastAPI can turn them into the correct responses.
     """
+    db = SessionLocal()
     try:
-        db = SessionLocal()
-        print(f"DEBUG: db = {db}, type = {type(db)}")
         yield db
-    except HTTPException:
-        raise
-    except Exception as e:
-        import traceback
-        print(f"ERROR in get_db: {str(e)}")
-        traceback.print_exc()
-        raise HTTPException(
-            status_code=503,
-            detail=f"Database unavailable: {str(e)}"
-        )
     finally:
         db.close()
 
