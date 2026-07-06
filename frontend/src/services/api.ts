@@ -4,11 +4,11 @@
  * Central axios instance for talking to the backend.
  * Base URL comes from the VITE_API_URL environment variable.
  *
- * Authentication: once a user logs in, a JWT access token is stored in
+ * Authentication: after a user logs in, a JWT access token is stored in
  * localStorage under 'auth_token' and attached to every request as
- * "Authorization: Bearer <token>". If no token is present, the request
- * falls back to the build-time VITE_API_KEY (legacy API key) so the app
- * keeps working during the migration to full user auth.
+ * "Authorization: Bearer <token>". Requests made before login carry no
+ * token; protected endpoints answer 401 and the response interceptor
+ * sends the user to the login page.
  */
 
 import axios from 'axios'
@@ -18,12 +18,6 @@ import axios from 'axios'
  * Falls back to localhost for safety during development.
  */
 const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-
-/**
- * Legacy build-time API key, used only as a fallback when no user token
- * is available. Will be removed once user auth is fully adopted.
- */
-const apiKey = import.meta.env.VITE_API_KEY || ''
 
 /**
  * Shared axios instance with sensible defaults.
@@ -36,15 +30,12 @@ export const api = axios.create({
 })
 
 /**
- * Attach the user's JWT (preferred) or the legacy API key to every
- * outgoing request.
+ * Attach the user's JWT access token (when present) to every request.
  */
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('auth_token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
-  } else if (apiKey) {
-    config.headers.Authorization = `Bearer ${apiKey}`
   }
   return config
 })
