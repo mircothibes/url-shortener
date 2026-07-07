@@ -171,16 +171,10 @@ export const ProfileSettings: React.FC = () => {
     setLoading(true)
     try {
       /**
-       * Simulate API call
+       * Update profile via AuthContext. The email is persisted to the
+       * backend; name and avatar are kept locally for display.
        */
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      /**
-       * Update profile via AuthContext.
-       * This updates React state, the session, and the mock database,
-       * so the change persists across logout/login.
-       */
-      updateUser({
+      await updateUser({
         name: fullName,
         email: email,
         avatar: avatar,
@@ -193,7 +187,11 @@ export const ProfileSettings: React.FC = () => {
        */
       setTimeout(() => setSuccessMessage(''), 3000)
     } catch (error) {
-      setErrorMessage('Failed to update profile. Please try again.')
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to update profile. Please try again.'
+      setErrorMessage(message)
     } finally {
       setLoading(false)
     }
