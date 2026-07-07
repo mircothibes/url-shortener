@@ -36,7 +36,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>
   register: (email: string, password: string, name: string) => Promise<void>
   logout: () => void
-  updateUser: (updatedFields: Partial<User>) => void
+  updateUser: (updatedFields: Partial<User>) => Promise<void>
   updatePassword: (currentPassword: string, newPassword: string) => Promise<void>
 }
 
@@ -90,13 +90,20 @@ const isTokenValid = (token: string): boolean => {
  * Extract a human-readable message from an axios/backend error.
  */
 const errorMessage = (err: unknown, fallback: string): string => {
-  const detail = (err as { response?: { data?: { detail?: unknown } } })
-    ?.response?.data?.detail
+  const data = (err as { response?: { data?: { error?: unknown; detail?: unknown } } })
+    ?.response?.data
+
+  // Custom HTTPException handler returns { error: "..." }
+  if (typeof data?.error === 'string') return data.error
+
+  // FastAPI validation errors return { detail: "..." } or a list of items
+  const detail = data?.detail
   if (typeof detail === 'string') return detail
   if (Array.isArray(detail)) {
     const first = detail[0] as { msg?: string } | undefined
     if (first?.msg) return first.msg
   }
+
   return fallback
 }
 
@@ -215,24 +222,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }
 
   /**
-   * Update the local user profile (display only). Not persisted to the
-   * backend, which has no profile-update endpoint yet.
+   * Update the current user's profile. The email is persisted to the
+   * backend via PATCH /auth/me; name and avatar are local-only, as the
+   * backend has no columns for them yet.
    */
-  const updateUser = (updatedFields: Partial<User>) => {
+  const updateUser = async (updatedFields: Partial<User>) => {
+    let fields = updatedFields
+
+    if (fields.email && user && fields.email !== user.email) {
+      try {
+        const res = await api.patch('/api/v1/auth/me', { email: fields.email })
+        fields = { ...fields, email: res.data.email }
+      } catch (err) {
+        throw new Error(errorMessage(err, 'Failed to update profile'))
+      }
+    }
+
     setUser((prev) => {
       if (!prev) return prev
-      const updated = { ...prev, ...updatedFields }
+      const updated = { ...prev, ...fields }
       localStorage.setItem('user_data', JSON.stringify(updated))
       return updated
     })
   }
 
   /**
-   * Password change is not available yet: the backend does not expose a
-   * change-password endpoint. Kept for API compatibility with the UI.
+   * Change the current user's password via POST /auth/change-password.
+   * The backend verifies the current password before applying the new one.
    */
-  const updatePassword = async (_currentPassword: string, _newPassword: string) => {
-    throw new Error('Password change is not available yet')
+  const updatePassword = async (currentPassword: string, newPassword: string) => {
+    try {
+      await api.post('/api/v1/auth/change-password', {
+        current_password: currentPassword,
+        new_password: newPassword,
+      })
+    } catch (err) {
+      throw new Error(errorMessage(err, 'Failed to change password'))
+    }
   }
 
   const value: AuthContextType = {
