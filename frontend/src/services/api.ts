@@ -51,7 +51,9 @@ api.interceptors.response.use(
     const status = error.response?.status
     const url: string = error.config?.url || ''
     const isAuthCall =
-      url.includes('/auth/login') || url.includes('/auth/register')
+      url.includes('/auth/login') ||
+      url.includes('/auth/register') ||
+      url.includes('/auth/change-password')
 
     if (status === 401 && !isAuthCall) {
       localStorage.removeItem('auth_token')
