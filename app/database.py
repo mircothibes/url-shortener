@@ -3,10 +3,15 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://app_user:dev_password@localhost:5432/url_shortener"
-)
+# The database URL must be provided by the environment. There is no
+# hard-coded fallback on purpose: a missing DATABASE_URL should fail loudly
+# instead of silently connecting with default credentials.
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError(
+        "DATABASE_URL environment variable is not set. "
+        "Set it before starting the app (docker-compose provides it locally)."
+    )
 
 # Create engine WITHOUT pool_pre_ping
 engine = create_engine(
