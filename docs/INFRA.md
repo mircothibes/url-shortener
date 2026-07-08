@@ -39,15 +39,21 @@ connections.
 - The Cloud SQL instance has **no authorized networks** — the database is not
   reachable from the public internet. Only Cloud Run reaches it, through the
   socket.
+- **SSL is enforced** (`sslMode=ENCRYPTED_ONLY`): the instance rejects
+  unencrypted connections. The Cloud SQL connector used by Cloud Run already
+  authenticates and encrypts the socket connection, so this change is
+  transparent to the app.
 - A public IP is still assigned to the instance but is unusable without an
-  authorized network. Disabling it entirely (`--no-assign-ip`) is a possible
-  future hardening step.
+  authorized network. Removing it entirely (`--no-assign-ip`) is **not possible
+  with the current setup**: Cloud SQL requires at least one of public IP,
+  private IP, or PSC to remain enabled, and this instance has only a public IP.
+  Fully removing it would require enabling private IP (VPC) or PSC first.
 
-Verify there are no authorized networks (empty output is expected):
+Verify the security posture (no authorized networks, SSL enforced):
 
 ```bash
 gcloud sql instances describe url-shortener-db \
-  --format="value(settings.ipConfiguration.authorizedNetworks[].value)"
+  --format="json(settings.ipConfiguration.authorizedNetworks, settings.ipConfiguration.sslMode)"
 ```
 
 ## Local database access
