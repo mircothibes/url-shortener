@@ -11,6 +11,10 @@
  * - Pro: € 9/month - 10,000 URLs/month (most popular)
  * - Enterprise: Custom - Unlimited URLs
  *
+ * Only the Free plan has a working CTA (it links to registration, which is
+ * real and free). Pro and Enterprise are illustrative for this portfolio
+ * project, so their buttons are decorative.
+ *
  * Props: None
  *
  * Usage:
@@ -18,6 +22,7 @@
  */
 
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '../UI/Button'
 import { Check } from 'lucide-react'
 
@@ -50,6 +55,17 @@ interface PlanProps {
    * When true, plan gets blue background and larger scale
    */
   highlighted?: boolean
+
+  /**
+   * Label for the call-to-action button
+   */
+  ctaLabel: string
+
+  /**
+   * Optional route the CTA navigates to. When omitted, the button is
+   * decorative (disabled), used for illustrative plans in this portfolio.
+   */
+  ctaTo?: string
 }
 
 /**
@@ -67,7 +83,11 @@ const PricingCard: React.FC<PlanProps> = ({
   description,
   features,
   highlighted,
+  ctaLabel,
+  ctaTo,
 }) => {
+  const navigate = useNavigate()
+
   return (
     /**
      * Pricing card container with conditional styling
@@ -104,14 +124,16 @@ const PricingCard: React.FC<PlanProps> = ({
         )}
       </div>
 
-      {/* Call-to-action button */}
+      {/* Call-to-action button. Only plans with a ctaTo navigate; others are
+          decorative and disabled. */}
       <Button
         variant={highlighted ? 'secondary' : 'primary'}
         size="lg"
         className="w-full mb-8"
-        onClick={() => console.log(`Selected ${name} plan`)}
+        disabled={!ctaTo}
+        onClick={ctaTo ? () => navigate(ctaTo) : undefined}
       >
-        Choose Plan
+        {ctaLabel}
       </Button>
 
       {/* Features list with check icons */}
@@ -160,6 +182,8 @@ export const Pricing: React.FC = () => {
         'Email support',
         'No custom branding',
       ],
+      ctaLabel: 'Get Started Free',
+      ctaTo: '/register',
     },
     {
       name: 'Pro',
@@ -174,6 +198,7 @@ export const Pricing: React.FC = () => {
         'Webhooks',
       ],
       highlighted: true,
+      ctaLabel: 'Choose Plan',
     },
     {
       name: 'Enterprise',
@@ -186,6 +211,7 @@ export const Pricing: React.FC = () => {
         'Dedicated support',
         'Custom integrations',
       ],
+      ctaLabel: 'Contact Sales',
     },
   ]
 
