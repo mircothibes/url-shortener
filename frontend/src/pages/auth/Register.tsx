@@ -22,6 +22,7 @@
 
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import { Button } from '../../components/UI/Button'
 import { useAuth } from '../../hooks/useAuth'
 
@@ -143,6 +144,15 @@ export const Register: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center px-4 transition-colors">
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8 w-full max-w-md transition-colors">
 
+        {/* Back to Home */}
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 mb-6 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Home</span>
+        </Link>
+
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
@@ -209,7 +219,7 @@ export const Register: React.FC = () => {
               disabled={loading}
             />
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              At least 6 characters
+              At least 8 characters
             </p>
           </div>
 
