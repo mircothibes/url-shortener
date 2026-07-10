@@ -136,7 +136,7 @@ export const Footer: React.FC = () => {
         {/* Copyright section with border separator */}
         <div className="border-t border-slate-700 pt-8">
           <p className="text-slate-400 text-sm text-center">
-            © 2024 URL Shortener. All rights reserved.
+            © {new Date().getFullYear()} URL Shortener. All rights reserved.
           </p>
         </div>
       </div>
