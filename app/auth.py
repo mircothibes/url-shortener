@@ -17,10 +17,7 @@ from argon2.exceptions import VerifyMismatchError
 # Single hasher instance, consistent with the rest of the app
 _pwd_hasher = PasswordHasher()
 
-# JWT configuration (secret comes from the environment; never hard-coded)
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "")
 JWT_ALGORITHM = "HS256"
-JWT_EXPIRE_DAYS = int(os.getenv("JWT_EXPIRE_DAYS", "7"))
 
 
 def hash_password(password: str) -> str:
@@ -44,14 +41,16 @@ def generate_api_key() -> str:
 
 def create_access_token(user_id: str) -> str:
     """Create a signed JWT access token for the given user id."""
+    secret = os.getenv("JWT_SECRET_KEY", "")
+    expire_days = int(os.getenv("JWT_EXPIRE_DAYS", "7"))
     now = datetime.now(timezone.utc)
     payload = {
         "sub": str(user_id),
         "iat": now,
-        "exp": now + timedelta(days=JWT_EXPIRE_DAYS),
+        "exp": now + timedelta(days=expire_days),
         "type": "access",
     }
-    return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+    return jwt.encode(payload, secret, algorithm=JWT_ALGORITHM)
 
 
 def decode_access_token(token: str) -> Optional[str]:
@@ -59,10 +58,11 @@ def decode_access_token(token: str) -> Optional[str]:
     Decode a JWT and return its subject (user id), or None if the token is
     missing, malformed, expired, or the signing secret is not configured.
     """
-    if not JWT_SECRET_KEY or not token:
+    secret = os.getenv("JWT_SECRET_KEY", "")
+    if not secret or not token:
         return None
     try:
-        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        payload = jwt.decode(token, secret, algorithms=[JWT_ALGORITHM])
         return payload.get("sub")
     except jwt.PyJWTError:
         return None
