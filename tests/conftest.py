@@ -169,3 +169,18 @@ def mock_celery_tasks(monkeypatch):
     mock_task = Mock()
     mock_task.delay = Mock(return_value=None)
     monkeypatch.setattr("app.tasks.dispatch_event_to_all_webhooks", mock_task)
+
+
+@pytest.fixture(autouse=True)
+def set_jwt_secret(monkeypatch):
+    """Ensure a signing secret is present so JWT auth works in tests."""
+    monkeypatch.setenv("JWT_SECRET_KEY", "test-secret-key-for-pytest-only")
+
+
+@pytest.fixture(autouse=True)
+def disable_rate_limiting():
+    """Disable slowapi rate limiting during tests so it doesn't interfere."""
+    from app.main import limiter
+    limiter.enabled = False
+    yield
+    limiter.enabled = True
