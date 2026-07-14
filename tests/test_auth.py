@@ -10,10 +10,11 @@ from app.auth import hash_password
 @pytest.fixture
 def make_user(db_session):
     """Factory to create a user with a real hashed password."""
-    def _make(email="user@example.com", password="password123", is_active=True):
+    def _make(email="user@example.com", password="password123", is_active=True, name=None):
         user = User(
             id=uuid4(),
             email=email,
+            name=name,
             hashed_password=hash_password(password),
             api_key=f"key-{uuid4().hex}",
             is_active=is_active,
@@ -232,3 +233,54 @@ class TestChangePassword:
             json={"current_password": "password123", "new_password": "newpassword456"},
         )
         assert res.status_code == 401
+
+
+class TestName:
+    """Coverage for the user's name field"""
+
+    def test_register_with_name(self, client):
+        res = client.post(
+            "/api/v1/auth/register",
+            json={"email": "named@example.com", "password": "password123", "name": "Named User"},
+        )
+        assert res.status_code == 201
+        headers = {"Authorization": f"Bearer {res.json()['access_token']}"}
+        me = client.get("/api/v1/auth/me", headers=headers)
+        assert me.json()["name"] == "Named User"
+
+    def test_register_without_name_is_null(self, client):
+        res = client.post(
+            "/api/v1/auth/register",
+            json={"email": "noname@example.com", "password": "password123"},
+        )
+        assert res.status_code == 201
+        headers = {"Authorization": f"Bearer {res.json()['access_token']}"}
+        me = client.get("/api/v1/auth/me", headers=headers)
+        assert me.json()["name"] is None
+
+    def test_update_name_only(self, client, make_user):
+        make_user(email="nm@example.com", password="password123")
+        headers = auth_headers(client, "nm@example.com", "password123")
+        res = client.patch("/api/v1/auth/me", json={"name": "New Name"}, headers=headers)
+        assert res.status_code == 200
+        assert res.json()["name"] == "New Name"
+        assert res.json()["email"] == "nm@example.com"
+
+    def test_update_name_and_email(self, client, make_user):
+        make_user(email="both@example.com", password="password123")
+        headers = auth_headers(client, "both@example.com", "password123")
+        res = client.patch(
+            "/api/v1/auth/me",
+            json={"email": "both2@example.com", "name": "Both Changed"},
+            headers=headers,
+        )
+        assert res.status_code == 200
+        assert res.json()["email"] == "both2@example.com"
+        assert res.json()["name"] == "Both Changed"
+
+    def test_update_empty_body_noop(self, client, make_user):
+        make_user(email="noop@example.com", password="password123", name="Original")
+        headers = auth_headers(client, "noop@example.com", "password123")
+        res = client.patch("/api/v1/auth/me", json={}, headers=headers)
+        assert res.status_code == 200
+        assert res.json()["name"] == "Original"
