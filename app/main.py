@@ -1862,6 +1862,7 @@ class RegisterRequest(BaseModel):
     """Request body for user registration"""
     email: str
     password: str
+    name: Optional[str] = None
 
     @field_validator("email")
     @classmethod
@@ -1915,6 +1916,7 @@ async def register(
 
     user = User(
         email=email,
+        name=body.name.strip() if body.name else None,
         hashed_password=hash_password(body.password),
         api_key=generate_api_key(),
         is_active=True,
@@ -1980,16 +1982,20 @@ class UserResponse(BaseModel):
     """Public representation of a user account"""
     id: str
     email: str
+    name: Optional[str] = None
     is_active: bool
 
 
 class UpdateProfileRequest(BaseModel):
     """Request body for updating the current user's profile"""
-    email: str
+    email: Optional[str] = None
+    name: Optional[str] = None
 
     @field_validator("email")
     @classmethod
-    def _validate_email(cls, v: str) -> str:
+    def _validate_email(cls, v):
+        if v is None:
+            return v
         v = v.strip().lower()
         if "@" not in v or "." not in v.split("@")[-1]:
             raise ValueError("Invalid email format")
@@ -2026,6 +2032,7 @@ async def get_me(
     return UserResponse(
         id=str(user.id),
         email=user.email,
+        name=user.name,
         is_active=user.is_active,
     )
 
@@ -2043,28 +2050,39 @@ async def update_me(
     user_id: UUID = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Update the current user's email (the only editable profile field)."""
+    """Update the current user's editable profile fields (email and/or name)."""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    new_email = body.email.strip().lower()
-    if new_email != user.email:
-        existing = (
-            db.query(User)
-            .filter(User.email == new_email, User.id != user.id)
-            .first()
-        )
-        if existing:
-            raise HTTPException(status_code=409, detail="Email already in use")
+    changed = []
 
-        user.email = new_email
+    if body.email is not None:
+        new_email = body.email.strip().lower()
+        if new_email != user.email:
+            existing = (
+                db.query(User)
+                .filter(User.email == new_email, User.id != user.id)
+                .first()
+            )
+            if existing:
+                raise HTTPException(status_code=409, detail="Email already in use")
+            user.email = new_email
+            changed.append("email")
+
+    if body.name is not None:
+        new_name = body.name.strip() or None
+        if new_name != user.name:
+            user.name = new_name
+            changed.append("name")
+
+    if changed:
         db.add(AuditLog(
             user_id=user.id,
             action="UPDATE_PROFILE",
             resource_type="USER",
             resource_id=str(user.id),
-            details={},
+            details={"updated_fields": changed},
         ))
         db.commit()
         db.refresh(user)
@@ -2072,6 +2090,7 @@ async def update_me(
     return UserResponse(
         id=str(user.id),
         email=user.email,
+        name=user.name,
         is_active=user.is_active,
     )
 
