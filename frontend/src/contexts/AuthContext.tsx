@@ -61,6 +61,26 @@ const deriveName = (email: string): string => {
 }
 
 /**
+ * Build the User object after authentication.
+ *
+ * The login/register responses don't include the display name, so we fetch
+ * it from GET /me. When the backend name is empty (older accounts), we fall
+ * back to a name derived from the email.
+ */
+const buildUser = async (userId: string, email: string): Promise<User> => {
+  let name = deriveName(email)
+  try {
+    const me = await api.get('/api/v1/auth/me')
+    if (me.data?.name) {
+      name = me.data.name
+    }
+  } catch {
+    // If /me fails, keep the email-derived name as a safe fallback.
+  }
+  return { id: userId, email, name }
+}
+
+/**
  * Decode a JWT payload without verifying the signature (client-side only).
  */
 const parseJwt = (token: string): { exp?: number } | null => {
@@ -183,11 +203,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const res = await api.post('/api/v1/auth/login', { email, password })
       const { access_token, user_id, email: userEmail } = res.data
-      persistSession(access_token, {
-        id: user_id,
-        email: userEmail,
-        name: deriveName(userEmail),
-      })
+      localStorage.setItem('auth_token', access_token)
+      const builtUser = await buildUser(user_id, userEmail)
+      persistSession(access_token, builtUser)
     } catch (err) {
       throw new Error(errorMessage(err, 'Invalid email or password'))
     } finally {
@@ -200,16 +218,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    * not sent, because the backend has no name field yet; the display name
    * is derived from the email.
    */
-  const register = async (email: string, password: string, _name: string) => {
+  const register = async (email: string, password: string, name: string) => {
     setLoading(true)
     try {
-      const res = await api.post('/api/v1/auth/register', { email, password })
+      const res = await api.post('/api/v1/auth/register', { email, password, name })
       const { access_token, user_id, email: userEmail } = res.data
-      persistSession(access_token, {
-        id: user_id,
-        email: userEmail,
-        name: deriveName(userEmail),
-      })
+      localStorage.setItem('auth_token', access_token)
+      const builtUser = await buildUser(user_id, userEmail)
+      persistSession(access_token, builtUser)
     } catch (err) {
       throw new Error(errorMessage(err, 'Registration failed'))
     } finally {
@@ -229,10 +245,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const updateUser = async (updatedFields: Partial<User>) => {
     let fields = updatedFields
 
+    // Persist email and/or name to the backend when they change.
+    const payload: { email?: string; name?: string } = {}
     if (fields.email && user && fields.email !== user.email) {
+      payload.email = fields.email
+    }
+    if (fields.name !== undefined && user && fields.name !== user.name) {
+      payload.name = fields.name
+    }
+
+    if (Object.keys(payload).length > 0) {
       try {
-        const res = await api.patch('/api/v1/auth/me', { email: fields.email })
-        fields = { ...fields, email: res.data.email }
+        const res = await api.patch('/api/v1/auth/me', payload)
+        fields = { ...fields, email: res.data.email, name: res.data.name ?? undefined }
       } catch (err) {
         throw new Error(errorMessage(err, 'Failed to update profile'))
       }
