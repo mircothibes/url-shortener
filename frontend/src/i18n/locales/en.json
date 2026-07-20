@@ -1,0 +1,30 @@
+{
+  "nav": {
+    "features": "Features",
+    "howItWorks": "How it Works",
+    "pricing": "Pricing",
+    "login": "Login",
+    "signUp": "Sign Up",
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "logout": "Logout"
+  },
+  "hero": {
+    "title1": "Shorten URLs.",
+    "title2": " Track Clicks.",
+    "title3": "Grow.",
+    "subtitle": "Transform long URLs into trackable short links with real-time analytics. No complications, no setup. Just results.",
+    "getStarted": "Get Started",
+    "viewDemo": "View Demo",
+    "trustedBy": "Trusted by businesses like:",
+    "ecommerce": "E-commerce",
+    "marketing": "Marketing",
+    "influencers": "Influencers",
+    "journalism": "Journalism"
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "fr": "Français"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "nav": {
+    "features": "Fonctionnalités",
+    "howItWorks": "Comment ça marche",
+    "pricing": "Tarifs",
+    "login": "Connexion",
+    "signUp": "S'inscrire",
+    "home": "Accueil",
+    "dashboard": "Tableau de bord",
+    "logout": "Déconnexion"
+  },
+  "hero": {
+    "title1": "Raccourcissez vos URL.",
+    "title2": " Suivez les clics.",
+    "title3": "Développez-vous.",
+    "subtitle": "Transformez de longues URL en liens courts traçables avec des analyses en temps réel. Sans complications, sans configuration. Juste des résultats.",
+    "getStarted": "Commencer",
+    "viewDemo": "Voir la démo",
+    "trustedBy": "Ils nous font confiance :",
+    "ecommerce": "E-commerce",
+    "marketing": "Marketing",
+    "influencers": "Influenceurs",
+    "journalism": "Journalisme"
+  },
+  "language": {
+    "label": "Langue",
+    "en": "English",
+    "fr": "Français"
+  }
+}
