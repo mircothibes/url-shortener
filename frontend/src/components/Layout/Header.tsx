@@ -18,11 +18,14 @@ import React from 'react'
 import { Link, Home, LayoutDashboard } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { useTranslation } from 'react-i18next'
+import { LanguageSwitcher } from './LanguageSwitcher'
 
 export const Header: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { isAuthenticated, logout } = useAuth()
+  const { t } = useTranslation()
 
   const handleLogoClick = () => {
     navigate('/')
@@ -63,17 +66,18 @@ export const Header: React.FC = () => {
 
           {/* Navigation */}
           <nav className="hidden md:flex gap-8">
-            <a href="#features" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition font-medium">Features</a>
-            <a href="#how" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition font-medium">How it Works</a>
-            <a href="#pricing" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition font-medium">Pricing</a>
+            <a href="#features" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition font-medium">{t('nav.features')}</a>
+            <a href="#how" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition font-medium">{t('nav.howItWorks')}</a>
+            <a href="#pricing" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition font-medium">{t('nav.pricing')}</a>
           </nav>
 
           {/* Auth buttons */}
-          <div className="flex gap-3">
+          <div className="flex gap-3 items-center">
+            <LanguageSwitcher />
             {!isAuthenticated && (
               <>
-                <button onClick={() => navigate('/login')} className="text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 font-medium transition">Login</button>
-                <button onClick={() => navigate('/register')} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-medium">Sign Up</button>
+                <button onClick={() => navigate('/login')} className="text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 font-medium transition">{t('nav.login')}</button>
+                <button onClick={() => navigate('/register')} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-medium">{t('nav.signUp')}</button>
               </>
             )}
             {isAuthenticated && (
@@ -81,19 +85,19 @@ export const Header: React.FC = () => {
                 {/* Home button - always visible when authenticated */}
                 <button onClick={() => navigate('/')} className="flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition font-medium">
                   <Home className="w-5 h-5" />
-                  <span className="hidden sm:inline">Home</span>
+                  <span className="hidden sm:inline">{t('nav.home')}</span>
                 </button>
 
                 {/* Dashboard button - hidden when already on dashboard */}
                 {!isOnDashboard && !hasBackToDashboard && (
                   <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition font-medium">
                     <LayoutDashboard className="w-5 h-5" />
-                    <span className="hidden sm:inline">Dashboard</span>
+                    <span className="hidden sm:inline">{t('nav.dashboard')}</span>
                   </button>
                 )}
 
                 {/* Logout button - always visible when authenticated */}
-                <button onClick={handleLogout} className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium transition">Logout</button>
+                <button onClick={handleLogout} className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium transition">{t('nav.logout')}</button>
               </>
             )}
           </div>
