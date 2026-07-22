@@ -22,6 +22,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useTheme } from '../../contexts/ThemeContext'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Preferences Component
@@ -38,11 +39,12 @@ export const Preferences: React.FC = () => {
    * Reading/writing here applies the theme across the whole app.
    */
   const { theme, setTheme } = useTheme()
+  const { t, i18n } = useTranslation()
 
   /**
    * Language preference state
    */
-  const [language, setLanguage] = useState('en')
+  const [language, setLanguage] = useState(i18n.language?.startsWith('fr') ? 'fr' : 'en')
 
   /**
    * Email notifications enabled
@@ -77,7 +79,6 @@ export const Preferences: React.FC = () => {
     const savedPreferences = localStorage.getItem('user_preferences')
     if (savedPreferences) {
       const prefs = JSON.parse(savedPreferences)
-      setLanguage(prefs.language || 'en')
       setEmailNotifications(prefs.emailNotifications !== false)
       setWeeklyDigest(prefs.weeklyDigest !== false)
       setActivityNotifications(prefs.activityNotifications !== false)
@@ -96,7 +97,9 @@ export const Preferences: React.FC = () => {
    * Handle language change
    */
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setLanguage(e.target.value)
+    const lng = e.target.value
+    setLanguage(lng)
+    i18n.changeLanguage(lng)
   }
 
   /**
@@ -124,7 +127,7 @@ export const Preferences: React.FC = () => {
       }
       localStorage.setItem('user_preferences', JSON.stringify(preferences))
 
-      setSuccessMessage('Preferences saved successfully!')
+      setSuccessMessage(t('settings.preferences.saved'))
 
       /**
        * Clear message after 3 seconds
@@ -141,24 +144,24 @@ export const Preferences: React.FC = () => {
       {/* Theme Preferences */}
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6 transition-colors">
         <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
-          Appearance
+          {t('settings.preferences.appearance')}
         </h3>
 
         <div>
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
-            Theme
+            {t('settings.preferences.theme')}
           </label>
           <select
             value={theme}
             onChange={handleThemeChange}
             className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-            <option value="auto">Auto (system)</option>
+            <option value="light">{t('settings.preferences.light')}</option>
+            <option value="dark">{t('settings.preferences.dark')}</option>
+            <option value="auto">{t('settings.preferences.auto')}</option>
           </select>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-            Choose how the app looks
+            {t('settings.preferences.themeHint')}
           </p>
         </div>
       </div>
@@ -166,12 +169,12 @@ export const Preferences: React.FC = () => {
       {/* Language Preferences */}
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6 transition-colors">
         <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
-          Language
+          {t('settings.preferences.language')}
         </h3>
 
         <div>
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
-            Preferred Language
+            {t('settings.preferences.preferredLanguage')}
           </label>
           <select
             value={language}
@@ -179,9 +182,6 @@ export const Preferences: React.FC = () => {
             className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="en">English</option>
-            <option value="pt">Português</option>
-            <option value="es">Español</option>
-            <option value="de">Deutsch</option>
             <option value="fr">Français</option>
           </select>
         </div>
@@ -190,7 +190,7 @@ export const Preferences: React.FC = () => {
       {/* Notification Preferences */}
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6 transition-colors">
         <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
-          Notifications
+          {t('settings.preferences.notifications')}
         </h3>
 
         <div className="space-y-4">
@@ -198,9 +198,9 @@ export const Preferences: React.FC = () => {
           {/* Email notifications toggle */}
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium text-slate-900 dark:text-slate-100">Email Notifications</p>
+              <p className="font-medium text-slate-900 dark:text-slate-100">{t('settings.preferences.emailNotifications')}</p>
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Receive important updates via email
+                {t('settings.preferences.emailNotificationsHint')}
               </p>
             </div>
             <button
@@ -220,9 +220,9 @@ export const Preferences: React.FC = () => {
           {/* Weekly digest toggle */}
           <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700">
             <div>
-              <p className="font-medium text-slate-900 dark:text-slate-100">Weekly Digest</p>
+              <p className="font-medium text-slate-900 dark:text-slate-100">{t('settings.preferences.weeklyDigest')}</p>
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Get a weekly summary of your URLs
+                {t('settings.preferences.weeklyDigestHint')}
               </p>
             </div>
             <button
@@ -243,9 +243,9 @@ export const Preferences: React.FC = () => {
           {/* Activity notifications toggle */}
           <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700">
             <div>
-              <p className="font-medium text-slate-900 dark:text-slate-100">Activity Alerts</p>
+              <p className="font-medium text-slate-900 dark:text-slate-100">{t('settings.preferences.activityAlerts')}</p>
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Get notified when your URLs get clicks
+                {t('settings.preferences.activityAlertsHint')}
               </p>
             </div>
             <button
@@ -278,7 +278,7 @@ export const Preferences: React.FC = () => {
         disabled={loading}
         className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg transition"
       >
-        {loading ? 'Saving...' : 'Save Preferences'}
+        {loading ? t('settings.preferences.saving') : t('settings.preferences.save')}
       </button>
     </div>
   )
