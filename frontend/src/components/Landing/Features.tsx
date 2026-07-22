@@ -21,6 +21,7 @@
 
 import React from 'react'
 import { Link2, BarChart3, Globe, Zap, Lock, Smartphone } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Props interface for FeatureCard component
@@ -91,6 +92,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
  * @returns {React.ReactElement} Features section with grid layout
  */
 export const Features: React.FC = () => {
+  const { t } = useTranslation()
   /**
    * Array of feature objects with icon, title, and description
    * Each feature represents a key capability of the application
@@ -98,33 +100,33 @@ export const Features: React.FC = () => {
   const features = [
     {
       icon: <Link2 className="w-8 h-8" />,
-      title: 'Short URLs',
-      description: 'Shorten any URL. Auto-generated or custom codes. Your choice.',
+      title: t('features.items.shortUrls.title'),
+      description: t('features.items.shortUrls.description'),
     },
     {
       icon: <BarChart3 className="w-8 h-8" />,
-      title: 'Complete Analytics',
-      description: 'Track clicks, sources, devices, locations in real-time.',
+      title: t('features.items.analytics.title'),
+      description: t('features.items.analytics.description'),
     },
     {
       icon: <Globe className="w-8 h-8" />,
-      title: 'Geolocation',
-      description: 'Know which country, region, and city your clicks come from.',
+      title: t('features.items.geolocation.title'),
+      description: t('features.items.geolocation.description'),
     },
     {
       icon: <Zap className="w-8 h-8" />,
-      title: 'Lightning Fast',
-      description: 'Redis cache. Redirects under 50ms. 100x faster performance.',
+      title: t('features.items.fast.title'),
+      description: t('features.items.fast.description'),
     },
     {
       icon: <Lock className="w-8 h-8" />,
-      title: 'Secure',
-      description: 'Password protection, auto-expiration, complete control.',
+      title: t('features.items.secure.title'),
+      description: t('features.items.secure.description'),
     },
     {
       icon: <Smartphone className="w-8 h-8" />,
-      title: 'Device Detection',
-      description: 'Mobile, Desktop, Tablet. Know what your users are using.',
+      title: t('features.items.device.title'),
+      description: t('features.items.device.description'),
     },
   ]
 
@@ -139,10 +141,10 @@ export const Features: React.FC = () => {
         {/* Section header with title and description */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">
-            Everything You Need
+            {t('features.title')}
           </h2>
           <p className="text-lg text-slate-600 dark:text-slate-400">
-            13 powerful features to dominate your digital marketing
+            {t('features.subtitle')}
           </p>
         </div>
 
