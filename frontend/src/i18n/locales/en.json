@@ -26,5 +26,105 @@
     "label": "Language",
     "en": "English",
     "fr": "Français"
+  },
+  "features": {
+    "title": "Everything You Need",
+    "subtitle": "13 powerful features to dominate your digital marketing",
+    "items": {
+      "shortUrls": {
+        "title": "Short URLs",
+        "description": "Shorten any URL. Auto-generated or custom codes. Your choice."
+      },
+      "analytics": {
+        "title": "Complete Analytics",
+        "description": "Track clicks, sources, devices, locations in real-time."
+      },
+      "geolocation": {
+        "title": "Geolocation",
+        "description": "Know which country, region, and city your clicks come from."
+      },
+      "fast": {
+        "title": "Lightning Fast",
+        "description": "Redis cache. Redirects under 50ms. 100x faster performance."
+      },
+      "secure": {
+        "title": "Secure",
+        "description": "Password protection, auto-expiration, complete control."
+      },
+      "device": {
+        "title": "Device Detection",
+        "description": "Mobile, Desktop, Tablet. Know what your users are using."
+      }
+    }
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "subtitle": "3 simple steps to get started",
+    "step1": {
+      "title": "Paste Your URL",
+      "description": "Paste any long URL into the field and click shorten."
+    },
+    "step2": {
+      "title": "Get Short Link",
+      "description": "Receive an auto-generated short link or customize the code."
+    },
+    "step3": {
+      "title": "Track Clicks",
+      "description": "View real-time analytics: clicks, sources, locations."
+    }
+  },
+  "pricing": {
+    "title": "Simple Pricing",
+    "subtitle": "Pay only for what you use. No surprises.",
+    "perMonth": "/month",
+    "free": {
+      "name": "Free",
+      "description": "For getting started",
+      "cta": "Get Started Free",
+      "features": [
+        "100 URLs/month",
+        "Basic analytics",
+        "Email support",
+        "No custom branding"
+      ]
+    },
+    "pro": {
+      "name": "Pro",
+      "description": "Most popular",
+      "cta": "Choose Plan",
+      "features": [
+        "10,000 URLs/month",
+        "Complete analytics",
+        "Custom domains",
+        "API access",
+        "Priority support",
+        "Webhooks"
+      ]
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "priceLabel": "Custom",
+      "description": "For large volumes",
+      "cta": "Contact Sales",
+      "features": [
+        "Unlimited URLs",
+        "White-label solution",
+        "SLA guaranteed",
+        "Dedicated support",
+        "Custom integrations"
+      ]
+    }
+  },
+  "footer": {
+    "tagline": "Shorten URLs, track clicks, grow your business.",
+    "product": "Product",
+    "features": "Features",
+    "pricing": "Pricing",
+    "documentation": "Documentation",
+    "company": "Company",
+    "blog": "Blog",
+    "contact": "Contact",
+    "followUs": "Follow Us",
+    "rights": "All rights reserved."
   }
 }

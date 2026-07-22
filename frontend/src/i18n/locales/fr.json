@@ -26,5 +26,105 @@
     "label": "Langue",
     "en": "English",
     "fr": "Français"
+  },
+  "features": {
+    "title": "Tout ce dont vous avez besoin",
+    "subtitle": "13 fonctionnalités puissantes pour dominer votre marketing digital",
+    "items": {
+      "shortUrls": {
+        "title": "URL courtes",
+        "description": "Raccourcissez n'importe quelle URL. Codes auto-générés ou personnalisés. À vous de choisir."
+      },
+      "analytics": {
+        "title": "Analyses complètes",
+        "description": "Suivez les clics, les sources, les appareils et les lieux en temps réel."
+      },
+      "geolocation": {
+        "title": "Géolocalisation",
+        "description": "Sachez de quel pays, région et ville proviennent vos clics."
+      },
+      "fast": {
+        "title": "Ultra-rapide",
+        "description": "Cache Redis. Redirections en moins de 50 ms. Des performances 100x supérieures."
+      },
+      "secure": {
+        "title": "Sécurisé",
+        "description": "Protection par mot de passe, expiration automatique, contrôle total."
+      },
+      "device": {
+        "title": "Détection d'appareil",
+        "description": "Mobile, ordinateur, tablette. Sachez ce qu'utilisent vos visiteurs."
+      }
+    }
+  },
+  "howItWorks": {
+    "title": "Comment ça marche",
+    "subtitle": "3 étapes simples pour commencer",
+    "step1": {
+      "title": "Collez votre URL",
+      "description": "Collez n'importe quelle URL longue dans le champ et cliquez sur raccourcir."
+    },
+    "step2": {
+      "title": "Obtenez un lien court",
+      "description": "Recevez un lien court auto-généré ou personnalisez le code."
+    },
+    "step3": {
+      "title": "Suivez les clics",
+      "description": "Consultez les analyses en temps réel : clics, sources, lieux."
+    }
+  },
+  "pricing": {
+    "title": "Tarifs simples",
+    "subtitle": "Payez uniquement ce que vous utilisez. Sans surprises.",
+    "perMonth": "/mois",
+    "free": {
+      "name": "Gratuit",
+      "description": "Pour bien démarrer",
+      "cta": "Commencer gratuitement",
+      "features": [
+        "100 URL/mois",
+        "Analyses de base",
+        "Support par e-mail",
+        "Sans personnalisation de marque"
+      ]
+    },
+    "pro": {
+      "name": "Pro",
+      "description": "Le plus populaire",
+      "cta": "Choisir ce plan",
+      "features": [
+        "10 000 URL/mois",
+        "Analyses complètes",
+        "Domaines personnalisés",
+        "Accès API",
+        "Support prioritaire",
+        "Webhooks"
+      ]
+    },
+    "enterprise": {
+      "name": "Entreprise",
+      "priceLabel": "Sur mesure",
+      "description": "Pour les grands volumes",
+      "cta": "Contacter le service commercial",
+      "features": [
+        "URL illimitées",
+        "Solution en marque blanche",
+        "SLA garanti",
+        "Support dédié",
+        "Intégrations personnalisées"
+      ]
+    }
+  },
+  "footer": {
+    "tagline": "Raccourcissez vos URL, suivez les clics, développez votre activité.",
+    "product": "Produit",
+    "features": "Fonctionnalités",
+    "pricing": "Tarifs",
+    "documentation": "Documentation",
+    "company": "Entreprise",
+    "blog": "Blog",
+    "contact": "Contact",
+    "followUs": "Suivez-nous",
+    "rights": "Tous droits réservés."
   }
 }
