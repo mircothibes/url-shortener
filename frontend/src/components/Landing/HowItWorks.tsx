@@ -18,6 +18,7 @@
 
 import React from 'react'
 import { Copy, Link, BarChart3 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Props interface for Step component
@@ -104,6 +105,7 @@ const Step: React.FC<StepProps> = ({
  * @returns {React.ReactElement} How it works section
  */
 export const HowItWorks: React.FC = () => {
+  const { t } = useTranslation()
   return (
     /**
      * How it works section container
@@ -116,10 +118,10 @@ export const HowItWorks: React.FC = () => {
         {/* Section header with title and description */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">
-            How It Works
+            {t('howItWorks.title')}
           </h2>
           <p className="text-lg text-slate-600 dark:text-slate-400">
-            3 simple steps to get started
+            {t('howItWorks.subtitle')}
           </p>
         </div>
 
@@ -130,24 +132,24 @@ export const HowItWorks: React.FC = () => {
           <Step
             number={1}
             icon={<Copy className="w-8 h-8" />}
-            title="Paste Your URL"
-            description="Paste any long URL into the field and click shorten."
+            title={t('howItWorks.step1.title')}
+            description={t('howItWorks.step1.description')}
           />
 
           {/* Step 2: Get Short Link */}
           <Step
             number={2}
             icon={<Link className="w-8 h-8" />}
-            title="Get Short Link"
-            description="Receive an auto-generated short link or customize the code."
+            title={t('howItWorks.step2.title')}
+            description={t('howItWorks.step2.description')}
           />
 
           {/* Step 3: Track Clicks */}
           <Step
             number={3}
             icon={<BarChart3 className="w-8 h-8" />}
-            title="Track Clicks"
-            description="View real-time analytics: clicks, sources, locations."
+            title={t('howItWorks.step3.title')}
+            description={t('howItWorks.step3.description')}
           />
         </div>
       </div>
