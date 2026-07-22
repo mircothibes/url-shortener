@@ -25,6 +25,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../UI/Button'
 import { Check } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Props interface for PricingCard component
@@ -87,6 +88,7 @@ const PricingCard: React.FC<PlanProps> = ({
   ctaTo,
 }) => {
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   return (
     /**
@@ -117,9 +119,9 @@ const PricingCard: React.FC<PlanProps> = ({
         <span className="text-4xl font-bold">
           {price}
         </span>
-        {price !== 'Custom' && (
+        {price !== t('pricing.enterprise.priceLabel') && (
           <span className={highlighted ? 'text-blue-100' : 'text-slate-600 dark:text-slate-400'}>
-            /month
+            {t('pricing.perMonth')}
           </span>
         )}
       </div>
@@ -167,51 +169,34 @@ const PricingCard: React.FC<PlanProps> = ({
  * @returns {React.ReactElement} Pricing section with 3 plans
  */
 export const Pricing: React.FC = () => {
+  const { t } = useTranslation()
   /**
    * Array of pricing plans with details
    * Each plan includes name, price, description, and features list
    */
   const plans = [
     {
-      name: 'Free',
+      name: t('pricing.free.name'),
       price: '€ 0',
-      description: 'For getting started',
-      features: [
-        '100 URLs/month',
-        'Basic analytics',
-        'Email support',
-        'No custom branding',
-      ],
-      ctaLabel: 'Get Started Free',
+      description: t('pricing.free.description'),
+      features: t('pricing.free.features', { returnObjects: true }) as string[],
+      ctaLabel: t('pricing.free.cta'),
       ctaTo: '/register',
     },
     {
-      name: 'Pro',
+      name: t('pricing.pro.name'),
       price: '€ 9',
-      description: 'Most popular',
-      features: [
-        '10,000 URLs/month',
-        'Complete analytics',
-        'Custom domains',
-        'API access',
-        'Priority support',
-        'Webhooks',
-      ],
+      description: t('pricing.pro.description'),
+      features: t('pricing.pro.features', { returnObjects: true }) as string[],
       highlighted: true,
-      ctaLabel: 'Choose Plan',
+      ctaLabel: t('pricing.pro.cta'),
     },
     {
-      name: 'Enterprise',
-      price: 'Custom',
-      description: 'For large volumes',
-      features: [
-        'Unlimited URLs',
-        'White-label solution',
-        'SLA guaranteed',
-        'Dedicated support',
-        'Custom integrations',
-      ],
-      ctaLabel: 'Contact Sales',
+      name: t('pricing.enterprise.name'),
+      price: t('pricing.enterprise.priceLabel'),
+      description: t('pricing.enterprise.description'),
+      features: t('pricing.enterprise.features', { returnObjects: true }) as string[],
+      ctaLabel: t('pricing.enterprise.cta'),
     },
   ]
 
@@ -226,10 +211,10 @@ export const Pricing: React.FC = () => {
         {/* Section header with title and description */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100 mb-4">
-            Simple Pricing
+            {t('pricing.title')}
           </h2>
           <p className="text-lg text-slate-600 dark:text-slate-400">
-            Pay only for what you use. No surprises.
+            {t('pricing.subtitle')}
           </p>
         </div>
 
