@@ -126,5 +126,27 @@
     "contact": "Contact",
     "followUs": "Suivez-nous",
     "rights": "Tous droits réservés."
+  },
+  "settings": {
+    "preferences": {
+      "appearance": "Apparence",
+      "theme": "Thème",
+      "themeHint": "Choisissez l'apparence de l'application",
+      "light": "Clair",
+      "dark": "Sombre",
+      "auto": "Auto (système)",
+      "language": "Langue",
+      "preferredLanguage": "Langue préférée",
+      "notifications": "Notifications",
+      "emailNotifications": "Notifications par e-mail",
+      "emailNotificationsHint": "Recevez les mises à jour importantes par e-mail",
+      "weeklyDigest": "Résumé hebdomadaire",
+      "weeklyDigestHint": "Recevez un résumé hebdomadaire de vos URL",
+      "activityAlerts": "Alertes d'activité",
+      "activityAlertsHint": "Soyez notifié lorsque vos URL reçoivent des clics",
+      "saved": "Préférences enregistrées avec succès !",
+      "saving": "Enregistrement...",
+      "save": "Enregistrer les préférences"
+    }
   }
 }

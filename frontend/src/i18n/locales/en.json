@@ -126,5 +126,27 @@
     "contact": "Contact",
     "followUs": "Follow Us",
     "rights": "All rights reserved."
+  },
+  "settings": {
+    "preferences": {
+      "appearance": "Appearance",
+      "theme": "Theme",
+      "themeHint": "Choose how the app looks",
+      "light": "Light",
+      "dark": "Dark",
+      "auto": "Auto (system)",
+      "language": "Language",
+      "preferredLanguage": "Preferred Language",
+      "notifications": "Notifications",
+      "emailNotifications": "Email Notifications",
+      "emailNotificationsHint": "Receive important updates via email",
+      "weeklyDigest": "Weekly Digest",
+      "weeklyDigestHint": "Get a weekly summary of your URLs",
+      "activityAlerts": "Activity Alerts",
+      "activityAlertsHint": "Get notified when your URLs get clicks",
+      "saved": "Preferences saved successfully!",
+      "saving": "Saving...",
+      "save": "Save Preferences"
+    }
   }
 }
