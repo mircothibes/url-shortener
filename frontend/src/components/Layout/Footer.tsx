@@ -19,6 +19,7 @@
  */
 
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Footer Component
@@ -33,6 +34,7 @@ import React from 'react'
  * @returns {React.ReactElement} Footer element with multiple sections
  */
 export const Footer: React.FC = () => {
+  const { t } = useTranslation()
   return (
     /**
      * Footer container with dark background and white text
@@ -50,29 +52,29 @@ export const Footer: React.FC = () => {
               URL Shortener
             </h3>
             <p className="text-slate-400 text-sm">
-              Shorten URLs, track clicks, grow your business.
+              {t('footer.tagline')}
             </p>
           </div>
           
           {/* Product navigation links */}
           <div>
             <h4 className="font-semibold mb-4">
-              Product
+              {t('footer.product')}
             </h4>
             <ul className="space-y-2 text-slate-400 text-sm">
               <li>
                 <a href="#features" className="hover:text-white transition">
-                  Features
+                  {t('footer.features')}
                 </a>
               </li>
               <li>
                 <a href="#pricing" className="hover:text-white transition">
-                  Pricing
+                  {t('footer.pricing')}
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:text-white transition">
-                  Documentation
+                  {t('footer.documentation')}
                 </a>
               </li>
             </ul>
@@ -81,7 +83,7 @@ export const Footer: React.FC = () => {
           {/* Company information links */}
           <div>
             <h4 className="font-semibold mb-4">
-              Company
+              {t('footer.company')}
             </h4>
             <ul className="space-y-2 text-slate-400 text-sm">
               <li>
@@ -91,12 +93,12 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <a href="#" className="hover:text-white transition">
-                  Blog
+                  {t('footer.blog')}
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:text-white transition">
-                  Contact
+                  {t('footer.contact')}
                 </a>
               </li>
             </ul>
@@ -105,7 +107,7 @@ export const Footer: React.FC = () => {
           {/* Social media links section */}
           <div>
             <h4 className="font-semibold mb-4">
-              Follow Us
+              {t('footer.followUs')}
             </h4>
             <div className="flex gap-4">
               <a 
@@ -136,7 +138,7 @@ export const Footer: React.FC = () => {
         {/* Copyright section with border separator */}
         <div className="border-t border-slate-700 pt-8">
           <p className="text-slate-400 text-sm text-center">
-            © {new Date().getFullYear()} URL Shortener. All rights reserved.
+            © {new Date().getFullYear()} URL Shortener. {t('footer.rights')}
           </p>
         </div>
       </div>
