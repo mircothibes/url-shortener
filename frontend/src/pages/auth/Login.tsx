@@ -24,6 +24,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '../../components/UI/Button'
 import { useAuth } from '../../hooks/useAuth'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Login Component
@@ -54,6 +55,7 @@ export const Login: React.FC = () => {
    * Get auth context for login function
    */
   const { login, loading } = useAuth()
+  const { t } = useTranslation()
 
   /**
    * Router navigation hook
@@ -73,7 +75,7 @@ export const Login: React.FC = () => {
      * Input validation
      */
     if (!email || !password) {
-      setError('Please fill in all fields')
+      setError(t('auth.errors.fillAllFields'))
       return
     }
 
@@ -82,7 +84,7 @@ export const Login: React.FC = () => {
      */
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
-      setError('Please enter a valid email')
+      setError(t('auth.errors.invalidEmail'))
       return
     }
 
@@ -90,7 +92,7 @@ export const Login: React.FC = () => {
      * Password length validation
      */
     if (password.length < 8) {
-      setError('Password must be at least 8 characters')
+      setError(t('auth.errors.passwordTooShort'))
       return
     }
 
@@ -108,7 +110,7 @@ export const Login: React.FC = () => {
       /**
        * Display error message if login fails
        */
-      setError('Invalid email or password')
+      setError(t('auth.errors.invalidCredentials'))
       console.error('Login error:', err)
     }
   }
@@ -123,16 +125,16 @@ export const Login: React.FC = () => {
           className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Home</span>
+          <span>{t('auth.backToHome')}</span>
         </Link>
 
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            Welcome Back
+            {t('auth.login.title')}
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
-            Sign in to your account to continue
+            {t('auth.login.subtitle')}
           </p>
         </div>
 
@@ -151,13 +153,13 @@ export const Login: React.FC = () => {
           {/* Email Input */}
           <div>
             <label className="block text-slate-700 dark:text-slate-300 font-medium mb-2">
-              Email
+              {t('auth.login.email')}
             </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
+              placeholder={t('auth.emailPlaceholder')}
               className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               disabled={loading}
             />
@@ -166,7 +168,7 @@ export const Login: React.FC = () => {
           {/* Password Input */}
           <div>
             <label className="block text-slate-700 dark:text-slate-300 font-medium mb-2">
-              Password
+              {t('auth.login.password')}
             </label>
             <input
               type="password"
@@ -184,7 +186,7 @@ export const Login: React.FC = () => {
               to="/forgot-password"
               className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
             >
-              Forgot password?
+              {t('auth.login.forgotPassword')}
             </Link>
           </div>
 
@@ -195,7 +197,7 @@ export const Login: React.FC = () => {
             className="w-full"
             disabled={loading}
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? t('auth.login.signingIn') : t('auth.login.signIn')}
           </Button>
         </form>
 
@@ -204,9 +206,9 @@ export const Login: React.FC = () => {
 
         {/* Sign Up Link */}
         <p className="text-center text-slate-600 dark:text-slate-400">
-          Don't have an account?{' '}
+          {t('auth.login.noAccount')}{' '}
           <Link to="/register" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
-            Sign up
+            {t('auth.login.signUp')}
           </Link>
         </p>
       </div>
