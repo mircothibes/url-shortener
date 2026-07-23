@@ -148,5 +148,45 @@
       "saving": "Enregistrement...",
       "save": "Enregistrer les préférences"
     }
+  },
+  "auth": {
+    "backToHome": "Retour à l'accueil",
+    "emailPlaceholder": "votre@email.com",
+    "namePlaceholder": "Jean Dupont",
+    "login": {
+      "title": "Bon retour",
+      "subtitle": "Connectez-vous à votre compte pour continuer",
+      "email": "E-mail",
+      "password": "Mot de passe",
+      "forgotPassword": "Mot de passe oublié ?",
+      "signingIn": "Connexion...",
+      "signIn": "Se connecter",
+      "noAccount": "Vous n'avez pas de compte ?",
+      "signUp": "S'inscrire"
+    },
+    "register": {
+      "title": "Créer un compte",
+      "subtitle": "Rejoignez-nous et commencez à raccourcir vos URL",
+      "fullName": "Nom complet",
+      "email": "E-mail",
+      "password": "Mot de passe",
+      "passwordHint": "Au moins 8 caractères",
+      "confirmPassword": "Confirmer le mot de passe",
+      "agreeTo": "J'accepte les",
+      "terms": "Conditions d'utilisation",
+      "creating": "Création du compte...",
+      "createAccount": "Créer un compte",
+      "haveAccount": "Vous avez déjà un compte ?",
+      "signIn": "Se connecter"
+    },
+    "errors": {
+      "fillAllFields": "Veuillez remplir tous les champs",
+      "invalidEmail": "Veuillez saisir une adresse e-mail valide",
+      "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères",
+      "invalidCredentials": "E-mail ou mot de passe incorrect",
+      "nameTooShort": "Le nom doit contenir au moins 2 caractères",
+      "passwordsNoMatch": "Les mots de passe ne correspondent pas",
+      "registrationFailed": "Échec de l'inscription. Veuillez réessayer."
+    }
   }
 }
