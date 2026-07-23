@@ -25,6 +25,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '../../components/UI/Button'
 import { useAuth } from '../../hooks/useAuth'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Register Component
@@ -65,6 +66,7 @@ export const Register: React.FC = () => {
    * Get auth context for register function
    */
   const { register, loading } = useAuth()
+  const { t } = useTranslation()
 
   /**
    * Router navigation hook
@@ -84,7 +86,7 @@ export const Register: React.FC = () => {
      * Input validation - all fields required
      */
     if (!name || !email || !password || !confirmPassword) {
-      setError('Please fill in all fields')
+      setError(t('auth.errors.fillAllFields'))
       return
     }
 
@@ -92,7 +94,7 @@ export const Register: React.FC = () => {
      * Name length validation
      */
     if (name.length < 2) {
-      setError('Name must be at least 2 characters')
+      setError(t('auth.errors.nameTooShort'))
       return
     }
 
@@ -101,7 +103,7 @@ export const Register: React.FC = () => {
      */
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
-      setError('Please enter a valid email')
+      setError(t('auth.errors.invalidEmail'))
       return
     }
 
@@ -109,7 +111,7 @@ export const Register: React.FC = () => {
      * Password length validation
      */
     if (password.length < 8) {
-      setError('Password must be at least 8 characters')
+      setError(t('auth.errors.passwordTooShort'))
       return
     }
 
@@ -117,7 +119,7 @@ export const Register: React.FC = () => {
      * Password confirmation validation
      */
     if (password !== confirmPassword) {
-      setError('Passwords do not match')
+      setError(t('auth.errors.passwordsNoMatch'))
       return
     }
 
@@ -135,7 +137,7 @@ export const Register: React.FC = () => {
       /**
        * Display error message if registration fails
        */
-      setError(err instanceof Error ? err.message : 'Registration failed. Please try again.')
+      setError(err instanceof Error ? err.message : t('auth.errors.registrationFailed'))
       console.error('Register error:', err)
     }
   }
@@ -150,16 +152,16 @@ export const Register: React.FC = () => {
           className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Home</span>
+          <span>{t('auth.backToHome')}</span>
         </Link>
 
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            Create Account
+            {t('auth.register.title')}
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
-            Join us and start shortening URLs
+            {t('auth.register.subtitle')}
           </p>
         </div>
 
@@ -178,13 +180,13 @@ export const Register: React.FC = () => {
           {/* Name Input */}
           <div>
             <label className="block text-slate-700 dark:text-slate-300 font-medium mb-2">
-              Full Name
+              {t('auth.register.fullName')}
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="John Doe"
+              placeholder={t('auth.namePlaceholder')}
               className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               disabled={loading}
             />
@@ -193,13 +195,13 @@ export const Register: React.FC = () => {
           {/* Email Input */}
           <div>
             <label className="block text-slate-700 dark:text-slate-300 font-medium mb-2">
-              Email
+              {t('auth.register.email')}
             </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
+              placeholder={t('auth.emailPlaceholder')}
               className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
               disabled={loading}
             />
@@ -208,7 +210,7 @@ export const Register: React.FC = () => {
           {/* Password Input */}
           <div>
             <label className="block text-slate-700 dark:text-slate-300 font-medium mb-2">
-              Password
+              {t('auth.register.password')}
             </label>
             <input
               type="password"
@@ -219,14 +221,14 @@ export const Register: React.FC = () => {
               disabled={loading}
             />
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              At least 8 characters
+              {t('auth.register.passwordHint')}
             </p>
           </div>
 
           {/* Confirm Password Input */}
           <div>
             <label className="block text-slate-700 dark:text-slate-300 font-medium mb-2">
-              Confirm Password
+              {t('auth.register.confirmPassword')}
             </label>
             <input
               type="password"
@@ -247,9 +249,9 @@ export const Register: React.FC = () => {
               disabled={loading}
             />
             <label htmlFor="terms" className="ml-2 text-sm text-slate-600 dark:text-slate-400">
-              I agree to the{' '}
+              {t('auth.register.agreeTo')}{' '}
               <a href="#" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
-                Terms of Service
+                {t('auth.register.terms')}
               </a>
             </label>
           </div>
@@ -261,7 +263,7 @@ export const Register: React.FC = () => {
             className="w-full"
             disabled={loading}
           >
-            {loading ? 'Creating account...' : 'Create Account'}
+            {loading ? t('auth.register.creating') : t('auth.register.createAccount')}
           </Button>
         </form>
 
@@ -270,9 +272,9 @@ export const Register: React.FC = () => {
 
         {/* Login Link */}
         <p className="text-center text-slate-600 dark:text-slate-400">
-          Already have an account?{' '}
+          {t('auth.register.haveAccount')}{' '}
           <Link to="/login" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
-            Sign in
+            {t('auth.register.signIn')}
           </Link>
         </p>
       </div>
