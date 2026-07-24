@@ -147,6 +147,67 @@
       "saved": "Préférences enregistrées avec succès !",
       "saving": "Enregistrement...",
       "save": "Enregistrer les préférences"
+    },
+    "header": {
+      "backToDashboard": "Retour au tableau de bord",
+      "title": "Paramètres",
+      "subtitle": "Gérez votre compte et vos préférences",
+      "profile": "Profil",
+      "security": "Sécurité",
+      "preferencesTab": "Préférences",
+      "logoutConfirm": "Voulez-vous vraiment vous déconnecter ?",
+      "account": "Compte",
+      "loggedInAs": "Connecté en tant que :",
+      "logout": "Déconnexion",
+      "needHelp": "Besoin d'aide ?",
+      "needHelpText": "Pour des raisons de sécurité, certaines modifications peuvent nécessiter une vérification par e-mail."
+    },
+    "profile": {
+      "title": "Informations du profil",
+      "profilePicture": "Photo de profil",
+      "uploadNew": "Télécharger une nouvelle photo",
+      "fullName": "Nom complet",
+      "fullNamePlaceholder": "Saisissez votre nom complet",
+      "emailAddress": "Adresse e-mail",
+      "emailPlaceholder": "Saisissez votre adresse e-mail",
+      "emailHint": "Nous l'utiliserons pour les notifications importantes concernant votre compte",
+      "saving": "Enregistrement...",
+      "saveChanges": "Enregistrer les modifications",
+      "updated": "Profil mis à jour avec succès !",
+      "errors": {
+        "selectImage": "Veuillez sélectionner un fichier image",
+        "imageTooLarge": "L'image doit faire moins de 2 Mo",
+        "imageReadFailed": "Échec de la lecture de l'image. Veuillez essayer un autre fichier.",
+        "enterName": "Veuillez saisir votre nom complet",
+        "enterEmail": "Veuillez saisir votre adresse e-mail",
+        "invalidEmail": "Veuillez saisir une adresse e-mail valide"
+      }
+    },
+    "security": {
+      "title": "Changer le mot de passe",
+      "currentPassword": "Mot de passe actuel",
+      "currentPasswordPlaceholder": "Saisissez votre mot de passe actuel",
+      "newPassword": "Nouveau mot de passe",
+      "newPasswordPlaceholder": "Saisissez votre nouveau mot de passe",
+      "passwordHint": "Au moins 8 caractères",
+      "confirmPassword": "Confirmer le mot de passe",
+      "confirmPasswordPlaceholder": "Confirmez votre nouveau mot de passe",
+      "strengthLabel": "Force :",
+      "strength": {
+        "weak": "faible",
+        "medium": "moyen",
+        "strong": "fort"
+      },
+      "updating": "Mise à jour...",
+      "changePassword": "Changer le mot de passe",
+      "changed": "Mot de passe modifié avec succès !",
+      "errors": {
+        "enterCurrent": "Veuillez saisir votre mot de passe actuel",
+        "enterNew": "Veuillez saisir votre nouveau mot de passe",
+        "noMatch": "Les mots de passe ne correspondent pas",
+        "tooShort": "Le mot de passe doit contenir au moins 8 caractères",
+        "sameAsCurrent": "Le nouveau mot de passe doit être différent de l'actuel"
+      }
     }
   },
   "auth": {

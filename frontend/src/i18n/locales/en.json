@@ -147,6 +147,67 @@
       "saved": "Preferences saved successfully!",
       "saving": "Saving...",
       "save": "Save Preferences"
+    },
+    "header": {
+      "backToDashboard": "Back to Dashboard",
+      "title": "Settings",
+      "subtitle": "Manage your account and preferences",
+      "profile": "Profile",
+      "security": "Security",
+      "preferencesTab": "Preferences",
+      "logoutConfirm": "Are you sure you want to logout?",
+      "account": "Account",
+      "loggedInAs": "Logged in as:",
+      "logout": "Logout",
+      "needHelp": "Need Help?",
+      "needHelpText": "For security reasons, some settings changes may require email verification."
+    },
+    "profile": {
+      "title": "Profile Information",
+      "profilePicture": "Profile Picture",
+      "uploadNew": "Upload new picture",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Enter your full name",
+      "emailAddress": "Email Address",
+      "emailPlaceholder": "Enter your email",
+      "emailHint": "We'll use this for important account notifications",
+      "saving": "Saving...",
+      "saveChanges": "Save Changes",
+      "updated": "Profile updated successfully!",
+      "errors": {
+        "selectImage": "Please select an image file",
+        "imageTooLarge": "Image must be smaller than 2MB",
+        "imageReadFailed": "Failed to read image. Please try another file.",
+        "enterName": "Please enter your full name",
+        "enterEmail": "Please enter your email",
+        "invalidEmail": "Please enter a valid email address"
+      }
+    },
+    "security": {
+      "title": "Change Password",
+      "currentPassword": "Current Password",
+      "currentPasswordPlaceholder": "Enter your current password",
+      "newPassword": "New Password",
+      "newPasswordPlaceholder": "Enter your new password",
+      "passwordHint": "At least 8 characters",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm your new password",
+      "strengthLabel": "Strength:",
+      "strength": {
+        "weak": "weak",
+        "medium": "medium",
+        "strong": "strong"
+      },
+      "updating": "Updating...",
+      "changePassword": "Change Password",
+      "changed": "Password changed successfully!",
+      "errors": {
+        "enterCurrent": "Please enter your current password",
+        "enterNew": "Please enter your new password",
+        "noMatch": "Passwords do not match",
+        "tooShort": "Password must be at least 8 characters",
+        "sameAsCurrent": "New password must be different from current password"
+      }
     }
   },
   "auth": {
