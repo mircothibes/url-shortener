@@ -24,6 +24,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../../hooks/useAuth'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Maximum allowed image size in bytes (2 MB).
@@ -44,6 +45,7 @@ export const ProfileSettings: React.FC = () => {
    * Get user and auth functions from context
    */
   const { user, updateUser } = useAuth()
+  const { t } = useTranslation()
 
   /**
    * Full name state
@@ -110,7 +112,7 @@ export const ProfileSettings: React.FC = () => {
      * Validate file type
      */
     if (!file.type.startsWith('image/')) {
-      setErrorMessage('Please select an image file')
+      setErrorMessage(t('settings.profile.errors.selectImage'))
       return
     }
 
@@ -118,7 +120,7 @@ export const ProfileSettings: React.FC = () => {
      * Validate file size
      */
     if (file.size > MAX_IMAGE_SIZE) {
-      setErrorMessage('Image must be smaller than 2MB')
+      setErrorMessage(t('settings.profile.errors.imageTooLarge'))
       return
     }
 
@@ -130,7 +132,7 @@ export const ProfileSettings: React.FC = () => {
       setAvatar(reader.result as string)
     }
     reader.onerror = () => {
-      setErrorMessage('Failed to read image. Please try another file.')
+      setErrorMessage(t('settings.profile.errors.imageReadFailed'))
     }
     reader.readAsDataURL(file)
   }
@@ -147,7 +149,7 @@ export const ProfileSettings: React.FC = () => {
      * Validate full name
      */
     if (!fullName.trim()) {
-      setErrorMessage('Please enter your full name')
+      setErrorMessage(t('settings.profile.errors.enterName'))
       return
     }
 
@@ -155,7 +157,7 @@ export const ProfileSettings: React.FC = () => {
      * Validate email
      */
     if (!email.trim()) {
-      setErrorMessage('Please enter your email')
+      setErrorMessage(t('settings.profile.errors.enterEmail'))
       return
     }
 
@@ -164,7 +166,7 @@ export const ProfileSettings: React.FC = () => {
      */
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
-      setErrorMessage('Please enter a valid email address')
+      setErrorMessage(t('settings.profile.errors.invalidEmail'))
       return
     }
 
@@ -180,7 +182,7 @@ export const ProfileSettings: React.FC = () => {
         avatar: avatar,
       })
 
-      setSuccessMessage('Profile updated successfully!')
+      setSuccessMessage(t('settings.profile.updated'))
 
       /**
        * Clear message after 3 seconds
@@ -201,7 +203,7 @@ export const ProfileSettings: React.FC = () => {
     <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6 transition-colors">
       {/* Section title */}
       <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-6">
-        Profile Information
+        {t('settings.profile.title')}
       </h3>
 
       {/* Form */}
@@ -235,13 +237,13 @@ export const ProfileSettings: React.FC = () => {
             )}
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Profile Picture</p>
+            <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{t('settings.profile.profilePicture')}</p>
             <button
               type="button"
               onClick={handleUploadClick}
               className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 mt-1"
             >
-              Upload new picture
+              {t('settings.profile.uploadNew')}
             </button>
             {/* Hidden file input */}
             <input
@@ -257,13 +259,13 @@ export const ProfileSettings: React.FC = () => {
         {/* Full name */}
         <div>
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Full Name
+            {t('settings.profile.fullName')}
           </label>
           <input
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            placeholder="Enter your full name"
+            placeholder={t('settings.profile.fullNamePlaceholder')}
             className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -271,17 +273,17 @@ export const ProfileSettings: React.FC = () => {
         {/* Email */}
         <div>
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Email Address
+            {t('settings.profile.emailAddress')}
           </label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email"
+            placeholder={t('settings.profile.emailPlaceholder')}
             className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            We'll use this for important account notifications
+            {t('settings.profile.emailHint')}
           </p>
         </div>
 
@@ -292,7 +294,7 @@ export const ProfileSettings: React.FC = () => {
             disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg transition"
           >
-            {loading ? 'Saving...' : 'Save Changes'}
+            {loading ? t('settings.profile.saving') : t('settings.profile.saveChanges')}
           </button>
         </div>
       </form>
