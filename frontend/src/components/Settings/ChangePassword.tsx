@@ -21,6 +21,7 @@
  * <ChangePassword />
  */
 
+import { useTranslation } from 'react-i18next'
 import React, { useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 
@@ -38,6 +39,7 @@ export const ChangePassword: React.FC = () => {
    * Get auth data and password updater from context
    */
   const { updatePassword } = useAuth()
+  const { t } = useTranslation()
 
   /**
    * Old password state
@@ -107,7 +109,7 @@ export const ChangePassword: React.FC = () => {
      * Validate old password presence
      */
     if (!oldPassword) {
-      setErrorMessage('Please enter your current password')
+      setErrorMessage(t('settings.security.errors.enterCurrent'))
       return
     }
 
@@ -115,7 +117,7 @@ export const ChangePassword: React.FC = () => {
      * Validate new password presence
      */
     if (!newPassword) {
-      setErrorMessage('Please enter your new password')
+      setErrorMessage(t('settings.security.errors.enterNew'))
       return
     }
 
@@ -123,7 +125,7 @@ export const ChangePassword: React.FC = () => {
      * Validate password confirmation
      */
     if (newPassword !== confirmPassword) {
-      setErrorMessage('Passwords do not match')
+      setErrorMessage(t('settings.security.errors.noMatch'))
       return
     }
 
@@ -131,7 +133,7 @@ export const ChangePassword: React.FC = () => {
      * Validate password length
      */
     if (newPassword.length < 8) {
-      setErrorMessage('Password must be at least 8 characters')
+      setErrorMessage(t('settings.security.errors.tooShort'))
       return
     }
 
@@ -139,7 +141,7 @@ export const ChangePassword: React.FC = () => {
      * Validate new password is different from old
      */
     if (newPassword === oldPassword) {
-      setErrorMessage('New password must be different from current password')
+      setErrorMessage(t('settings.security.errors.sameAsCurrent'))
       return
     }
 
@@ -152,7 +154,7 @@ export const ChangePassword: React.FC = () => {
        */
       await updatePassword(oldPassword, newPassword)
 
-      setSuccessMessage('Password changed successfully!')
+      setSuccessMessage(t('settings.security.changed'))
       setOldPassword('')
       setNewPassword('')
       setConfirmPassword('')
@@ -178,7 +180,7 @@ export const ChangePassword: React.FC = () => {
     <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6 transition-colors">
       {/* Section title */}
       <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-6">
-        Change Password
+        {t('settings.security.title')}
       </h3>
 
       {/* Form */}
@@ -201,13 +203,13 @@ export const ChangePassword: React.FC = () => {
         {/* Old password */}
         <div>
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Current Password
+            {t('settings.security.currentPassword')}
           </label>
           <input
             type="password"
             value={oldPassword}
             onChange={(e) => setOldPassword(e.target.value)}
-            placeholder="Enter your current password"
+            placeholder={t('settings.security.currentPasswordPlaceholder')}
             className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -218,13 +220,13 @@ export const ChangePassword: React.FC = () => {
         {/* New password */}
         <div>
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            New Password
+            {t('settings.security.newPassword')}
           </label>
           <input
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="Enter your new password"
+            placeholder={t('settings.security.newPasswordPlaceholder')}
             className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
@@ -232,32 +234,32 @@ export const ChangePassword: React.FC = () => {
           {newPassword && (
             <div className="mt-2">
               <div className="flex items-center gap-2 mb-1">
-                <p className="text-xs text-slate-600 dark:text-slate-400">Strength:</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400">{t('settings.security.strengthLabel')}</p>
                 <div className="w-24 h-2 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden">
                   <div className={`h-full ${getStrengthColor(passwordStrength)} w-1/3`}></div>
                 </div>
                 <span className="text-xs font-medium text-slate-700 dark:text-slate-300 capitalize">
-                  {passwordStrength}
+                  {t(`settings.security.strength.${passwordStrength}`)}
                 </span>
               </div>
             </div>
           )}
 
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            At least 8 characters
+            {t('settings.security.passwordHint')}
           </p>
         </div>
 
         {/* Confirm password */}
         <div>
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Confirm Password
+            {t('settings.security.confirmPassword')}
           </label>
           <input
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Confirm your new password"
+            placeholder={t('settings.security.confirmPasswordPlaceholder')}
             className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {newPassword && confirmPassword && newPassword === confirmPassword && (
@@ -275,7 +277,7 @@ export const ChangePassword: React.FC = () => {
             disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg transition"
           >
-            {loading ? 'Updating...' : 'Change Password'}
+            {loading ? t('settings.security.updating') : t('settings.security.changePassword')}
           </button>
         </div>
       </form>
