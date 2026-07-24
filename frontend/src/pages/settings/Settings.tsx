@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, LogOut } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
+import { useTranslation } from 'react-i18next'
 import { ProfileSettings } from '../../components/Settings/ProfileSettings'
 import { ChangePassword } from '../../components/Settings/ChangePassword'
 import { Preferences } from '../../components/Settings/Preferences'
@@ -9,10 +10,11 @@ import { Preferences } from '../../components/Settings/Preferences'
 export const Settings: React.FC = () => {
   const navigate = useNavigate()
   const { user, logout } = useAuth()
+  const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState('profile')
 
   const handleLogout = () => {
-    const confirmed = window.confirm('Are you sure you want to logout?')
+    const confirmed = window.confirm(t('settings.header.logoutConfirm'))
     if (confirmed) {
       logout()
       navigate('/login')
@@ -32,15 +34,15 @@ export const Settings: React.FC = () => {
           className="flex items-center gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 mb-6 transition"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Dashboard</span>
+          <span>{t('settings.header.backToDashboard')}</span>
         </button>
 
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            Settings
+            {t('settings.header.title')}
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
-            Manage your account and preferences
+            {t('settings.header.subtitle')}
           </p>
         </div>
 
@@ -55,7 +57,7 @@ export const Settings: React.FC = () => {
                   : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
-              Profile
+              {t('settings.header.profile')}
             </button>
 
             <button
@@ -66,7 +68,7 @@ export const Settings: React.FC = () => {
                   : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
-              Security
+              {t('settings.header.security')}
             </button>
 
             <button
@@ -77,7 +79,7 @@ export const Settings: React.FC = () => {
                   : 'border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
-              Preferences
+              {t('settings.header.preferencesTab')}
             </button>
           </div>
         </div>
@@ -94,12 +96,12 @@ export const Settings: React.FC = () => {
 
               <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6 transition-colors">
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
-                  Account
+                  {t('settings.header.account')}
                 </h3>
 
                 <div className="space-y-4">
                   <p className="text-sm text-slate-600 dark:text-slate-400">
-                    Logged in as: <span className="font-semibold dark:text-slate-200">{user?.email}</span>
+                    {t('settings.header.loggedInAs')} <span className="font-semibold dark:text-slate-200">{user?.email}</span>
                   </p>
 
                   <button
@@ -107,7 +109,7 @@ export const Settings: React.FC = () => {
                     className="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition font-medium"
                   >
                     <LogOut className="w-4 h-4" />
-                    Logout
+                    {t('settings.header.logout')}
                   </button>
                 </div>
               </div>
@@ -121,10 +123,10 @@ export const Settings: React.FC = () => {
 
         <div className="mt-12 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-6 transition-colors">
           <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">
-            💡 Need Help?
+            💡 {t('settings.header.needHelp')}
           </h3>
           <p className="text-sm text-blue-800 dark:text-blue-300">
-            For security reasons, some settings changes may require email verification.
+            {t('settings.header.needHelpText')}
           </p>
         </div>
       </div>
