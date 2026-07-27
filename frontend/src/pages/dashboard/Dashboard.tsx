@@ -27,6 +27,7 @@ import { StatsCard } from '../../components/Dashboard/StatsCard'
 import { URLsList } from '../../components/Dashboard/URLsList'
 import { QuickCreate } from '../../components/Dashboard/QuickCreate'
 import { useAuth } from '../../hooks/useAuth'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { listURLs, deleteURL, type URLItem } from '../../services/urls'
 
@@ -43,6 +44,7 @@ export const Dashboard: React.FC = () => {
    * Get user from auth context
    */
   const { user } = useAuth()
+  const { t } = useTranslation()
 
   /**
    * Router navigation hook
@@ -147,10 +149,10 @@ export const Dashboard: React.FC = () => {
         <div className="mb-8 flex items-center justify-between">
          <div>
            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-             Welcome back, {user?.name}! 👋
+             {t('dashboard.welcome', { name: user?.name })} 👋
            </h1>
            <p className="text-slate-600 dark:text-slate-400 mt-2">
-             Here's what's happening with your URLs today
+             {t('dashboard.subtitle')}
            </p>
          </div>
          <div className="flex items-center gap-3">
@@ -159,14 +161,14 @@ export const Dashboard: React.FC = () => {
              className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg transition"
            >
              <List className="w-5 h-5" />
-             <span>Manage URLs</span>
+             <span>{t('dashboard.manageUrls')}</span>
            </button>
            <button
              onClick={() => navigate('/settings')}
              className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg transition"
            >
              <Settings className="w-5 h-5" />
-             <span>Settings</span>
+             <span>{t('dashboard.settings')}</span>
            </button>
          </div>
         </div>
@@ -176,7 +178,7 @@ export const Dashboard: React.FC = () => {
           {/* Total URLs stat */}
           <StatsCard
             icon={<Link2 className="w-6 h-6" />}
-            title="Total URLs"
+            title={t('dashboard.stats.totalUrls')}
             value={stats.totalUrls}
             color="blue"
           />
@@ -184,7 +186,7 @@ export const Dashboard: React.FC = () => {
           {/* Total Clicks stat */}
           <StatsCard
             icon={<Eye className="w-6 h-6" />}
-            title="Total Clicks"
+            title={t('dashboard.stats.totalClicks')}
             value={stats.totalClicks}
             change="+12.5%"
             color="green"
@@ -193,7 +195,7 @@ export const Dashboard: React.FC = () => {
           {/* Average Clicks stat */}
           <StatsCard
             icon={<BarChart3 className="w-6 h-6" />}
-            title="Avg. Clicks"
+            title={t('dashboard.stats.avgClicks')}
             value={stats.averageClicks}
             change="+2.1%"
             color="purple"
@@ -202,7 +204,7 @@ export const Dashboard: React.FC = () => {
           {/* Top URL stat */}
           <StatsCard
             icon={<TrendingUp className="w-6 h-6" />}
-            title="Top URL"
+            title={t('dashboard.stats.topUrl')}
             value={stats.topUrl?.clicks || 0}
             color="orange"
           />
@@ -222,13 +224,13 @@ export const Dashboard: React.FC = () => {
           {/* URLs list - spans 2 columns */}
           <div className="lg:col-span-2">
             <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">
-              Your URLs
+              {t('dashboard.yourUrls')}
             </h2>
 
             {/* Loading state */}
             {loading && (
               <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-8 text-center transition-colors">
-                <p className="text-slate-600 dark:text-slate-400">Loading your URLs...</p>
+                <p className="text-slate-600 dark:text-slate-400">{t('dashboard.loading')}</p>
               </div>
             )}
 
@@ -253,12 +255,12 @@ export const Dashboard: React.FC = () => {
         {/* Quick tips section */}
         <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-6 transition-colors">
           <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">
-            💡 Quick Tips
+            💡 {t('dashboard.tips.title')}
           </h3>
           <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1">
-            <li>✓ Use descriptive custom codes for better brand recognition</li>
-            <li>✓ Track analytics to see which links perform best</li>
-            <li>✓ Share your short URLs to get more traffic</li>
+            <li>✓ {t('dashboard.tips.tip1')}</li>
+            <li>✓ {t('dashboard.tips.tip2')}</li>
+            <li>✓ {t('dashboard.tips.tip3')}</li>
           </ul>
         </div>
       </div>
