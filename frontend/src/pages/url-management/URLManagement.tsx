@@ -14,6 +14,7 @@
  * <URLManagement />
  */
 
+import { useTranslation } from 'react-i18next'
 import React, { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
@@ -50,6 +51,7 @@ const formatDate = (iso: string): string => {
  * @returns {React.ReactElement} URL management page
  */
 export const URLManagement: React.FC = () => {
+  const { t } = useTranslation()
   /**
    * Router navigation hook
    */
@@ -106,7 +108,7 @@ export const URLManagement: React.FC = () => {
         }
       } catch {
         if (active) {
-          setError('Failed to load your URLs. Please try again.')
+          setError(t('urlManagement.loadError'))
         }
       } finally {
         if (active) {
@@ -185,7 +187,7 @@ export const URLManagement: React.FC = () => {
       await deleteURL(id)
       setUrls((prev) => prev.filter((url) => url.id !== id))
     } catch {
-      window.alert('Failed to delete the URL. Please try again.')
+      window.alert(t('urlManagement.deleteError'))
     }
   }
 
@@ -235,16 +237,16 @@ export const URLManagement: React.FC = () => {
           className="flex items-center gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 mb-6 transition"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Dashboard</span>
+          <span>{t('urlManagement.backToDashboard')}</span>
         </button>
 
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            URL Management
+            {t('urlManagement.title')}
           </h1>
           <p className="text-slate-600 dark:text-slate-400">
-            Manage all your shortened URLs in one place
+            {t('urlManagement.subtitle')}
           </p>
         </div>
 
@@ -263,7 +265,7 @@ export const URLManagement: React.FC = () => {
            * Loading state
            */
           <div className="text-center py-12 text-slate-600 dark:text-slate-400">
-            Loading your URLs...
+            {t('urlManagement.loading')}
           </div>
         ) : error ? (
           /**
@@ -281,15 +283,15 @@ export const URLManagement: React.FC = () => {
             {/* Results summary */}
             <div className="mb-4">
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Showing{' '}
+                {t('urlManagement.showing')}{' '}
                 <span className="font-semibold dark:text-slate-200">
                   {filteredURLs.length}
                 </span>{' '}
-                of{' '}
+                {t('urlManagement.of')}{' '}
                 <span className="font-semibold dark:text-slate-200">
                   {urls.length}
                 </span>{' '}
-                URLs
+                {t('urlManagement.urls')}
               </p>
             </div>
 
@@ -317,12 +319,12 @@ export const URLManagement: React.FC = () => {
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">🔍</div>
                 <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                  No URLs found
+                  {t('urlManagement.noUrlsFound')}
                 </h2>
                 <p className="text-slate-600 dark:text-slate-400 mb-6">
                   {searchTerm || filterStatus !== 'all'
-                    ? 'Try adjusting your search or filters'
-                    : 'Create your first shortened URL in the Dashboard'}
+                    ? t('urlManagement.adjustSearch')
+                    : t('urlManagement.createFirst')}
                 </p>
               </div>
             )}
