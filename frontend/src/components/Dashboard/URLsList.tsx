@@ -28,6 +28,7 @@
  * />
  */
 
+import { useTranslation } from 'react-i18next'
 import React, { useState } from 'react'
 import { Copy, BarChart3, Trash2, Check } from 'lucide-react'
 
@@ -103,6 +104,7 @@ export const URLsList: React.FC<URLsListProps> = ({
   onDelete,
   onAnalytics
 }) => {
+  const { t } = useTranslation()
   /**
    * Track which short code was just copied
    * Used to show "Copied!" feedback
@@ -139,7 +141,7 @@ export const URLsList: React.FC<URLsListProps> = ({
     return (
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-8 text-center transition-colors">
         <p className="text-slate-600 dark:text-slate-400">
-          No URLs created yet. Create your first short URL to get started!
+          {t('dashboard.list.empty')}
         </p>
       </div>
     )
@@ -156,19 +158,19 @@ export const URLsList: React.FC<URLsListProps> = ({
         <thead className="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Short Code
+              {t('dashboard.list.shortCode')}
             </th>
             <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Original URL
+              {t('dashboard.list.originalUrl')}
             </th>
             <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Clicks
+              {t('dashboard.list.clicks')}
             </th>
             <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Created
+              {t('dashboard.list.created')}
             </th>
             <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Actions
+              {t('dashboard.list.actions')}
             </th>
           </tr>
         </thead>
@@ -187,7 +189,7 @@ export const URLsList: React.FC<URLsListProps> = ({
                   <button
                     onClick={() => copyToClipboard(url.shortCode, url.id)}
                     className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition"
-                    title="Copy short code"
+                    title={t('dashboard.list.copyCode')}
                   >
                     {copiedId === url.id ? (
                       <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
@@ -225,14 +227,14 @@ export const URLsList: React.FC<URLsListProps> = ({
                   <button
                     onClick={() => onAnalytics(url.id)}
                     className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition"
-                    title="View analytics"
+                    title={t('dashboard.list.viewAnalytics')}
                   >
                     <BarChart3 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => onDelete(url.id)}
                     className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition"
-                    title="Delete URL"
+                    title={t('dashboard.list.deleteUrl')}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
