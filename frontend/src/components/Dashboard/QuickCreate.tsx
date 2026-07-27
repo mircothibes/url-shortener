@@ -29,6 +29,7 @@ import React, { useState } from 'react'
 import { createURL } from '../../services/urls' 
 import { Button } from '../UI/Button'
 import { Copy, Check } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Props interface for QuickCreate component
@@ -62,6 +63,7 @@ export const QuickCreate: React.FC<QuickCreateProps> = ({
   onSuccess,
   onError
 }) => {
+  const { t } = useTranslation()
   /**
    * Original URL input state
    */
@@ -123,12 +125,12 @@ export const QuickCreate: React.FC<QuickCreateProps> = ({
      * Validate original URL
      */
     if (!originalUrl.trim()) {
-      setError('Please enter a URL')
+      setError(t('dashboard.quickCreate.errors.enterUrl'))
       return
     }
 
     if (!isValidUrl(originalUrl)) {
-      setError('Please enter a valid URL (e.g., https://example.com)')
+      setError(t('dashboard.quickCreate.errors.invalidUrl'))
       return
     }
 
@@ -136,7 +138,7 @@ export const QuickCreate: React.FC<QuickCreateProps> = ({
      * Validate custom code if provided
      */
     if (customCode && customCode.length < 2) {
-      setError('Custom code must be at least 2 characters')
+      setError(t('dashboard.quickCreate.errors.customTooShort'))
       return
     }
 
@@ -151,7 +153,7 @@ export const QuickCreate: React.FC<QuickCreateProps> = ({
       /**
        * Show success with the short code returned by the backend
        */
-      const successMessage = `Short URL created! Code: ${created.shortCode}`
+      const successMessage = t('dashboard.quickCreate.created', { code: created.shortCode })
       setSuccess({
         shortCode: created.shortCode,
         message: successMessage,
@@ -173,7 +175,7 @@ export const QuickCreate: React.FC<QuickCreateProps> = ({
        */
       setTimeout(() => setSuccess(null), 5000)
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create URL'
+      const errorMessage = err instanceof Error ? err.message : t('dashboard.quickCreate.errors.createFailed')
       setError(errorMessage)
       onError(errorMessage)
     } finally {
@@ -195,10 +197,10 @@ export const QuickCreate: React.FC<QuickCreateProps> = ({
 
       {/* Header */}
       <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-        Create New Short URL
+        {t('dashboard.quickCreate.title')}
       </h2>
       <p className="text-slate-600 dark:text-slate-400 text-sm mb-6">
-        Paste any long URL and we'll create a short code for you
+        {t('dashboard.quickCreate.subtitle')}
       </p>
 
       {/* Success Message */}
@@ -215,7 +217,7 @@ export const QuickCreate: React.FC<QuickCreateProps> = ({
               {copied ? (
                 <>
                   <Check className="w-4 h-4" />
-                  <span className="text-sm">Copied!</span>
+                  <span className="text-sm">{t('dashboard.quickCreate.copied')}</span>
                 </>
               ) : (
                 <>
@@ -243,13 +245,13 @@ export const QuickCreate: React.FC<QuickCreateProps> = ({
         {/* Original URL Input */}
         <div>
           <label className="block text-slate-700 dark:text-slate-300 font-medium mb-2">
-            Long URL
+            {t('dashboard.quickCreate.longUrl')}
           </label>
           <input
             type="url"
             value={originalUrl}
             onChange={(e) => setOriginalUrl(e.target.value)}
-            placeholder="https://example.com/very/long/url"
+            placeholder={t('dashboard.quickCreate.longUrlPlaceholder')}
             className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
             disabled={loading}
           />
@@ -258,18 +260,18 @@ export const QuickCreate: React.FC<QuickCreateProps> = ({
         {/* Custom Code Input */}
         <div>
           <label className="block text-slate-700 dark:text-slate-300 font-medium mb-2">
-            Custom Code (Optional)
+            {t('dashboard.quickCreate.customCode')}
           </label>
           <input
             type="text"
             value={customCode}
             onChange={(e) => setCustomCode(e.target.value)}
-            placeholder="my-link (leave empty for auto-generate)"
+            placeholder={t('dashboard.quickCreate.customCodePlaceholder')}
             className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
             disabled={loading}
           />
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            At least 2 characters, letters and numbers only
+            {t('dashboard.quickCreate.customCodeHint')}
           </p>
         </div>
 
@@ -280,7 +282,7 @@ export const QuickCreate: React.FC<QuickCreateProps> = ({
           className="w-full"
           disabled={loading}
         >
-          {loading ? 'Creating...' : 'Create Short URL'}
+          {loading ? t('dashboard.quickCreate.creating') : t('dashboard.quickCreate.create')}
         </Button>
       </form>
     </div>
