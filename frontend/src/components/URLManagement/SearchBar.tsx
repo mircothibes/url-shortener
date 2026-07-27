@@ -32,6 +32,7 @@
  * />
  */
 
+import { useTranslation } from 'react-i18next'
 import React from 'react'
 import { Search, X } from 'lucide-react'
 
@@ -90,6 +91,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   filterStatus,
   onFilterChange,
 }) => {
+  const { t } = useTranslation()
   /**
    * Handle clear search button click
    */
@@ -109,7 +111,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           {/* Search input */}
           <input
             type="text"
-            placeholder="Search by short code or URL..."
+            placeholder={t('urlManagement.search.placeholder')}
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full pl-10 pr-10 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -133,33 +135,33 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         {/* Sort dropdown */}
         <div>
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Sort By
+            {t('urlManagement.search.sortBy')}
           </label>
           <select
             value={sortBy}
             onChange={(e) => onSortChange(e.target.value)}
             className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="most-clicks">Most Clicks</option>
-            <option value="least-clicks">Least Clicks</option>
+            <option value="newest">{t('urlManagement.search.newest')}</option>
+            <option value="oldest">{t('urlManagement.search.oldest')}</option>
+            <option value="most-clicks">{t('urlManagement.search.mostClicks')}</option>
+            <option value="least-clicks">{t('urlManagement.search.leastClicks')}</option>
           </select>
         </div>
 
         {/* Filter status dropdown */}
         <div>
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            Status
+            {t('urlManagement.search.status')}
           </label>
           <select
             value={filterStatus}
             onChange={(e) => onFilterChange(e.target.value)}
             className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="all">All URLs</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+            <option value="all">{t('urlManagement.search.allUrls')}</option>
+            <option value="active">{t('urlManagement.search.active')}</option>
+            <option value="inactive">{t('urlManagement.search.inactive')}</option>
           </select>
         </div>
       </div>
