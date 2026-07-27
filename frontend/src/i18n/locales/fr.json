@@ -249,5 +249,55 @@
       "passwordsNoMatch": "Les mots de passe ne correspondent pas",
       "registrationFailed": "Échec de l'inscription. Veuillez réessayer."
     }
+  },
+  "dashboard": {
+    "welcome": "Bon retour, {{name}} !",
+    "subtitle": "Voici ce qu'il se passe avec vos URL aujourd'hui",
+    "manageUrls": "Gérer les URL",
+    "settings": "Paramètres",
+    "stats": {
+      "totalUrls": "URL totales",
+      "totalClicks": "Clics totaux",
+      "avgClicks": "Clics moyens",
+      "topUrl": "URL principale"
+    },
+    "yourUrls": "Vos URL",
+    "loading": "Chargement de vos URL...",
+    "tips": {
+      "title": "Astuces rapides",
+      "tip1": "Utilisez des codes personnalisés descriptifs pour une meilleure reconnaissance de marque",
+      "tip2": "Suivez les analyses pour voir quels liens performent le mieux",
+      "tip3": "Partagez vos URL courtes pour générer plus de trafic"
+    },
+    "quickCreate": {
+      "title": "Créer une nouvelle URL courte",
+      "longUrl": "URL longue",
+      "longUrlPlaceholder": "https://exemple.com/tres/longue/url",
+      "customCode": "Code personnalisé (facultatif)",
+      "customCodePlaceholder": "mon-lien (laisser vide pour générer automatiquement)",
+      "customCodeHint": "Au moins 2 caractères, lettres et chiffres uniquement",
+      "creating": "Création...",
+      "create": "Créer l'URL courte",
+      "copied": "Copié !",
+      "created": "URL courte créée ! Code : {{code}}",
+      "errors": {
+        "enterUrl": "Veuillez saisir une URL",
+        "invalidUrl": "Veuillez saisir une URL valide (ex. : https://exemple.com)",
+        "customTooShort": "Le code personnalisé doit contenir au moins 2 caractères",
+        "createFailed": "Échec de la création de l'URL"
+      },
+      "subtitle": "Collez n'importe quelle URL longue et nous créerons un code court pour vous"
+    },
+    "list": {
+      "empty": "Aucune URL créée pour l'instant. Créez votre première URL courte pour commencer !",
+      "shortCode": "Code court",
+      "originalUrl": "URL d'origine",
+      "clicks": "Clics",
+      "created": "Créée le",
+      "actions": "Actions",
+      "copyCode": "Copier le code court",
+      "viewAnalytics": "Voir les analyses",
+      "deleteUrl": "Supprimer l'URL"
+    }
   }
 }

@@ -249,5 +249,55 @@
       "passwordsNoMatch": "Passwords do not match",
       "registrationFailed": "Registration failed. Please try again."
     }
+  },
+  "dashboard": {
+    "welcome": "Welcome back, {{name}}!",
+    "subtitle": "Here's what's happening with your URLs today",
+    "manageUrls": "Manage URLs",
+    "settings": "Settings",
+    "stats": {
+      "totalUrls": "Total URLs",
+      "totalClicks": "Total Clicks",
+      "avgClicks": "Avg. Clicks",
+      "topUrl": "Top URL"
+    },
+    "yourUrls": "Your URLs",
+    "loading": "Loading your URLs...",
+    "tips": {
+      "title": "Quick Tips",
+      "tip1": "Use descriptive custom codes for better brand recognition",
+      "tip2": "Track analytics to see which links perform best",
+      "tip3": "Share your short URLs to get more traffic"
+    },
+    "quickCreate": {
+      "title": "Create New Short URL",
+      "longUrl": "Long URL",
+      "longUrlPlaceholder": "https://example.com/very/long/url",
+      "customCode": "Custom Code (Optional)",
+      "customCodePlaceholder": "my-link (leave empty for auto-generate)",
+      "customCodeHint": "At least 2 characters, letters and numbers only",
+      "creating": "Creating...",
+      "create": "Create Short URL",
+      "copied": "Copied!",
+      "created": "Short URL created! Code: {{code}}",
+      "errors": {
+        "enterUrl": "Please enter a URL",
+        "invalidUrl": "Please enter a valid URL (e.g., https://example.com)",
+        "customTooShort": "Custom code must be at least 2 characters",
+        "createFailed": "Failed to create URL"
+      },
+      "subtitle": "Paste any long URL and we'll create a short code for you"
+    },
+    "list": {
+      "empty": "No URLs created yet. Create your first short URL to get started!",
+      "shortCode": "Short Code",
+      "originalUrl": "Original URL",
+      "clicks": "Clicks",
+      "created": "Created",
+      "actions": "Actions",
+      "copyCode": "Copy short code",
+      "viewAnalytics": "View analytics",
+      "deleteUrl": "Delete URL"
+    }
   }
 }
