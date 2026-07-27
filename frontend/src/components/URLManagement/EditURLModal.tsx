@@ -15,6 +15,7 @@
  * <EditURLModal url={url} onClose={...} onSaved={...} />
  */
 
+import { useTranslation } from 'react-i18next'
 import React, { useState } from 'react'
 import { updateURL } from '../../services/urls'
 import type { URLItem, URLUpdateInput } from '../../services/urls'
@@ -50,6 +51,7 @@ export const EditURLModal: React.FC<EditURLModalProps> = ({
   onClose,
   onSaved,
 }) => {
+  const { t } = useTranslation()
   /**
    * Editable field state, prefilled from the URL
    */
@@ -78,7 +80,7 @@ export const EditURLModal: React.FC<EditURLModalProps> = ({
       const updated = await updateURL(url.id, input)
       onSaved(updated)
     } catch {
-      setError('Failed to save changes. Please try again.')
+      setError(t('urlManagement.edit.saveError'))
       setSaving(false)
     }
   }
@@ -94,7 +96,7 @@ export const EditURLModal: React.FC<EditURLModalProps> = ({
       >
         {/* Title */}
         <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-1">
-          Edit URL
+          {t('urlManagement.edit.title')}
         </h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">
           {url.shortCode}
@@ -102,7 +104,7 @@ export const EditURLModal: React.FC<EditURLModalProps> = ({
 
         {/* Original URL field */}
         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-          Original URL
+          {t('urlManagement.edit.originalUrl')}
         </label>
         <input
           type="text"
@@ -113,13 +115,13 @@ export const EditURLModal: React.FC<EditURLModalProps> = ({
 
         {/* Description field */}
         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-          Description
+          {t('urlManagement.edit.description')}
         </label>
         <input
           type="text"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Optional"
+          placeholder={t('urlManagement.edit.descriptionPlaceholder')}
           className="w-full mb-4 px-3 py-2 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
@@ -132,7 +134,7 @@ export const EditURLModal: React.FC<EditURLModalProps> = ({
             className="w-4 h-4"
           />
           <span className="text-sm text-slate-700 dark:text-slate-300">
-            Active
+            {t('urlManagement.edit.active')}
           </span>
         </label>
 
@@ -148,14 +150,14 @@ export const EditURLModal: React.FC<EditURLModalProps> = ({
             disabled={saving}
             className="px-4 py-2 rounded text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition disabled:opacity-50"
           >
-            Cancel
+            {t('urlManagement.edit.cancel')}
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
             className="px-4 py-2 rounded text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50"
           >
-            {saving ? 'Saving...' : 'Save changes'}
+            {saving ? t('urlManagement.edit.saving') : t('urlManagement.edit.save')}
           </button>
         </div>
       </div>
