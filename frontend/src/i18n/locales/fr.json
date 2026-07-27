@@ -299,5 +299,52 @@
       "viewAnalytics": "Voir les analyses",
       "deleteUrl": "Supprimer l'URL"
     }
+  },
+  "urlManagement": {
+    "backToDashboard": "Retour au tableau de bord",
+    "title": "Gestion des URL",
+    "subtitle": "Gérez toutes vos URL courtes au même endroit",
+    "loading": "Chargement de vos URL...",
+    "loadError": "Échec du chargement de vos URL. Veuillez réessayer.",
+    "deleteError": "Échec de la suppression de l'URL. Veuillez réessayer.",
+    "showing": "Affichage de",
+    "of": "sur",
+    "urls": "URL",
+    "noUrlsFound": "Aucune URL trouvée",
+    "adjustSearch": "Essayez d'ajuster votre recherche ou vos filtres",
+    "createFirst": "Créez votre première URL courte dans le tableau de bord",
+    "search": {
+      "placeholder": "Rechercher par code court ou URL...",
+      "sortBy": "Trier par",
+      "newest": "Plus récentes",
+      "oldest": "Plus anciennes",
+      "mostClicks": "Plus de clics",
+      "leastClicks": "Moins de clics",
+      "status": "Statut",
+      "allUrls": "Toutes les URL",
+      "active": "Actives",
+      "inactive": "Inactives"
+    },
+    "card": {
+      "clicks": "Clics",
+      "created": "Créée le",
+      "copy": "Copier",
+      "copied": "✓ Copié",
+      "analytics": "📊 Analyses",
+      "edit": "✏️ Modifier",
+      "delete": "🗑️ Supprimer",
+      "deleteConfirm": "Voulez-vous vraiment supprimer « {{code}} » ?"
+    },
+    "edit": {
+      "title": "Modifier l'URL",
+      "originalUrl": "URL d'origine",
+      "description": "Description",
+      "descriptionPlaceholder": "Facultatif",
+      "active": "Active",
+      "cancel": "Annuler",
+      "saving": "Enregistrement...",
+      "save": "Enregistrer les modifications",
+      "saveError": "Échec de l'enregistrement des modifications. Veuillez réessayer."
+    }
   }
 }

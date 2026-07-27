@@ -299,5 +299,52 @@
       "viewAnalytics": "View analytics",
       "deleteUrl": "Delete URL"
     }
+  },
+  "urlManagement": {
+    "backToDashboard": "Back to Dashboard",
+    "title": "URL Management",
+    "subtitle": "Manage all your shortened URLs in one place",
+    "loading": "Loading your URLs...",
+    "loadError": "Failed to load your URLs. Please try again.",
+    "deleteError": "Failed to delete the URL. Please try again.",
+    "showing": "Showing",
+    "of": "of",
+    "urls": "URLs",
+    "noUrlsFound": "No URLs found",
+    "adjustSearch": "Try adjusting your search or filters",
+    "createFirst": "Create your first shortened URL in the Dashboard",
+    "search": {
+      "placeholder": "Search by short code or URL...",
+      "sortBy": "Sort By",
+      "newest": "Newest First",
+      "oldest": "Oldest First",
+      "mostClicks": "Most Clicks",
+      "leastClicks": "Least Clicks",
+      "status": "Status",
+      "allUrls": "All URLs",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "card": {
+      "clicks": "Clicks",
+      "created": "Created",
+      "copy": "Copy",
+      "copied": "✓ Copied",
+      "analytics": "📊 Analytics",
+      "edit": "✏️ Edit",
+      "delete": "🗑️ Delete",
+      "deleteConfirm": "Are you sure you want to delete \"{{code}}\"?"
+    },
+    "edit": {
+      "title": "Edit URL",
+      "originalUrl": "Original URL",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional",
+      "active": "Active",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "save": "Save changes",
+      "saveError": "Failed to save changes. Please try again."
+    }
   }
 }
