@@ -38,6 +38,7 @@
  * />
  */
 
+import { useTranslation } from 'react-i18next'
 import React, { useState } from 'react'
 
 /**
@@ -104,6 +105,7 @@ export const URLCard: React.FC<URLCardProps> = ({
   onAnalytics,
   onEdit,
 }) => {
+  const { t } = useTranslation()
   /**
    * State for showing copy confirmation message
    */
@@ -131,7 +133,7 @@ export const URLCard: React.FC<URLCardProps> = ({
    */
   const handleDelete = () => {
     const confirmed = window.confirm(
-      `Are you sure you want to delete "${shortCode}"?`
+      t('urlManagement.card.deleteConfirm', { code: shortCode })
     )
     if (confirmed) {
       onDelete(id)
@@ -164,7 +166,7 @@ export const URLCard: React.FC<URLCardProps> = ({
               : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
           }`}
         >
-          {copied ? '✓ Copied' : 'Copy'}
+          {copied ? t('urlManagement.card.copied') : t('urlManagement.card.copy')}
         </button>
       </div>
 
@@ -174,7 +176,7 @@ export const URLCard: React.FC<URLCardProps> = ({
         {/* Clicks stat */}
         <div>
           <p className="text-xs text-slate-600 dark:text-slate-400 font-medium uppercase">
-            Clicks
+            {t('urlManagement.card.clicks')}
           </p>
           <p className="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-1">
             {clicks}
@@ -184,7 +186,7 @@ export const URLCard: React.FC<URLCardProps> = ({
         {/* Created date stat */}
         <div>
           <p className="text-xs text-slate-600 dark:text-slate-400 font-medium uppercase">
-            Created
+            {t('urlManagement.card.created')}
           </p>
           <p className="text-sm text-slate-700 dark:text-slate-300 mt-1">
             {createdAt}
@@ -200,7 +202,7 @@ export const URLCard: React.FC<URLCardProps> = ({
           onClick={() => onAnalytics(id)}
           className="flex-1 px-3 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 rounded transition text-sm font-medium"
         >
-          📊 Analytics
+          {t('urlManagement.card.analytics')}
         </button>
 
         {/* Edit button */}
@@ -208,7 +210,7 @@ export const URLCard: React.FC<URLCardProps> = ({
           onClick={() => onEdit(id)}
           className="flex-1 px-3 py-2 bg-amber-50 text-amber-600 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 dark:hover:bg-amber-900/50 rounded transition text-sm font-medium"
         >
-          ✏️ Edit
+          {t('urlManagement.card.edit')}
         </button>
 
         {/* Delete button */}
@@ -216,7 +218,7 @@ export const URLCard: React.FC<URLCardProps> = ({
           onClick={handleDelete}
           className="flex-1 px-3 py-2 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 rounded transition text-sm font-medium"
         >
-          🗑️ Delete
+          {t('urlManagement.card.delete')}
         </button>
       </div>
     </div>
