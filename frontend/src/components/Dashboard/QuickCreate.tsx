@@ -29,6 +29,7 @@ import React, { useState } from 'react'
 import { createURL } from '../../services/urls' 
 import { Button } from '../UI/Button'
 import { Copy, Check } from 'lucide-react'
+import { isValidUrl } from '../../utils/url'
 import { useTranslation } from 'react-i18next'
 
 /**
@@ -103,15 +104,6 @@ export const QuickCreate: React.FC<QuickCreateProps> = ({
    * Validate URL format
    * Basic validation for HTTP/HTTPS URLs
    */
-  const isValidUrl = (url: string): boolean => {
-    try {
-      new URL(url)
-      return true
-    } catch {
-      return false
-    }
-  }
-
   /**
    * Handle form submission
    * Validates inputs and creates short URL
