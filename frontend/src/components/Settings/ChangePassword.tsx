@@ -24,6 +24,7 @@
 import { useTranslation } from 'react-i18next'
 import React, { useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
+import { getPasswordStrength } from '../../utils/passwordStrength'
 
 /**
  * ChangePassword Component
@@ -74,13 +75,6 @@ export const ChangePassword: React.FC = () => {
   /**
    * Calculate password strength
    */
-  const getPasswordStrength = (password: string): string => {
-    if (password.length < 8) return 'weak'
-    if (password.length < 12) return 'medium'
-    if (/[A-Z]/.test(password) && /[0-9]/.test(password)) return 'strong'
-    return 'medium'
-  }
-
   /**
    * Get password strength color
    */
