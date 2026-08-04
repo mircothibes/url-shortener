@@ -23,6 +23,7 @@ import { SearchBar } from '../../components/URLManagement/SearchBar'
 import { EditURLModal } from '../../components/URLManagement/EditURLModal'
 import { listURLs, deleteURL } from '../../services/urls'
 import type { URLItem } from '../../services/urls'
+import { formatDate } from '../../utils/date'
 
 /**
  * Format an ISO date string into a short, human-readable form.
@@ -31,18 +32,6 @@ import type { URLItem } from '../../services/urls'
  * @param {string} iso - ISO date string from the API
  * @returns {string} Formatted date (e.g., "May 20, 2024")
  */
-const formatDate = (iso: string): string => {
-  const date = new Date(iso)
-  if (isNaN(date.getTime())) {
-    return iso
-  }
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-}
-
 /**
  * URLManagement Component
  *

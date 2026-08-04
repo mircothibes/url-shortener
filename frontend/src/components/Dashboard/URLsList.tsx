@@ -31,6 +31,7 @@
 import { useTranslation } from 'react-i18next'
 import React, { useState } from 'react'
 import { Copy, BarChart3, Trash2, Check } from 'lucide-react'
+import { formatDate } from '../../utils/date'
 
 /**
  * Interface for URL object
@@ -125,15 +126,6 @@ export const URLsList: React.FC<URLsListProps> = ({
    * Format date to readable format
    * Converts ISO string to "Jan 15, 2024" format
    */
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    })
-  }
-
   /**
    * Empty state - show when no URLs
    */
