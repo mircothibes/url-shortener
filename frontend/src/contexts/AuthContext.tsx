@@ -20,6 +20,7 @@
 import React, { createContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { api } from '../services/api'
+import { deriveName } from '../utils/name'
 
 interface User {
   id: string
@@ -50,16 +51,6 @@ interface AuthProviderProps {
  * Derive a display name from an email address (local-part, prettified).
  * e.g. "jane.doe@example.com" -> "Jane Doe".
  */
-const deriveName = (email: string): string => {
-  const local = email.split('@')[0] || 'user'
-  const pretty = local
-    .split(/[._-]+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ')
-  return pretty || 'User'
-}
-
 /**
  * Build the User object after authentication.
  *
