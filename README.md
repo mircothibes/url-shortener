@@ -22,6 +22,36 @@ A production-grade, full-stack URL shortener with click analytics, geolocation, 
 
 **Demo login:** `demo@example.com` / `demo123456`
 
+## 📸 Screenshots
+
+The entire application is fully bilingual (English / French), with the language choice persisted across sessions. The screenshots below show the app in French.
+
+### Landing Page
+
+![Landing hero](docs/screenshots/landing-hero.png)
+
+![Landing features](docs/screenshots/landing-features.png)
+
+![Landing pricing](docs/screenshots/landing-pricing.png)
+
+### Dashboard
+
+Overview with click stats, quick URL creation, and the user's links.
+
+![Dashboard](docs/screenshots/dashboard.png)
+
+### URL Management
+
+Search, filter, and manage every shortened URL, with inline edit and analytics.
+
+![URL management](docs/screenshots/url-management.png)
+
+### Settings
+
+Profile, security, and preferences — including the language switcher.
+
+![Settings](docs/screenshots/settings.png)
+
 ## 🏗️ Architecture
 ```
 Browser
